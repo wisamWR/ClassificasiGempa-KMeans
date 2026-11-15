@@ -5,6 +5,7 @@ import joblib
 import folium
 import textwrap
 from datetime import datetime
+from pathlib import Path
 from folium.plugins import MarkerCluster, BeautifyIcon
 from streamlit_folium import st_folium
 from geopy.geocoders import Nominatim
@@ -92,22 +93,27 @@ RISK_DETAILS = {
 def get_color(label): return RISK_COLORS.get(label, 'gray')
 
 # --- 2. Load Data & Models ---
+# Path relatif terhadap root project, jadi app bisa dijalankan dari folder mana pun
+ROOT_DIR = Path(__file__).resolve().parent.parent
+MODELS_DIR = ROOT_DIR / "models"
+PROCESSED_DIR = ROOT_DIR / "data" / "processed"
+
 @st.cache_data
 def load_data():
-    df = pd.read_csv("earthquakes_with_cluster.csv", low_memory=False)
+    df = pd.read_csv(PROCESSED_DIR / "earthquakes_with_cluster.csv", low_memory=False)
     df['time'] = pd.to_datetime(df['time'], errors='coerce')
     return df
 
 @st.cache_resource
 def load_model():
     try:
-        pipeline = joblib.load("kmeans_pipeline.joblib")
+        pipeline = joblib.load(MODELS_DIR / "kmeans_pipeline.joblib")
     except FileNotFoundError:
-        scaler = joblib.load("scaler.joblib")
-        kmeans = joblib.load("kmeans_model.joblib")
+        scaler = joblib.load(MODELS_DIR / "scaler.joblib")
+        kmeans = joblib.load(MODELS_DIR / "kmeans_model.joblib")
         pipeline = Pipeline([('scaler', scaler), ('kmeans', kmeans)])
-        
-    cluster_info = pd.read_csv("cluster_info.csv")
+
+    cluster_info = pd.read_csv(MODELS_DIR / "cluster_info.csv")
     cluster_info = cluster_info.dropna(subset=['cluster', 'label'])
     return pipeline, cluster_info
 
