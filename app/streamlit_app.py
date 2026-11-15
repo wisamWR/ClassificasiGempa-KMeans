@@ -9,7 +9,6 @@ from folium.plugins import FastMarkerCluster
 from streamlit_folium import st_folium
 from geopy.geocoders import Nominatim
 from geopy.exc import GeopyError
-from sklearn.pipeline import Pipeline
 
 # --- 1. Page Config ---
 st.set_page_config(layout="wide", page_title="Earthquake Risk Viewer")
@@ -144,19 +143,13 @@ PROCESSED_DIR = ROOT_DIR / "data" / "processed"
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv(PROCESSED_DIR / "earthquakes_with_cluster.csv", low_memory=False)
-    df['time'] = pd.to_datetime(df['time'], errors='coerce')
-    return df
+    # Dihasilkan oleh: python -m gempa.train
+    return pd.read_parquet(PROCESSED_DIR / "earthquakes_with_cluster.parquet")
 
 @st.cache_resource
 def load_model():
-    try:
-        pipeline = joblib.load(MODELS_DIR / "kmeans_pipeline.joblib")
-    except FileNotFoundError:
-        scaler = joblib.load(MODELS_DIR / "scaler.joblib")
-        kmeans = joblib.load(MODELS_DIR / "kmeans_model.joblib")
-        pipeline = Pipeline([('scaler', scaler), ('kmeans', kmeans)])
-
+    # Pipeline = MinMaxScaler + KMeans (fitur: mag, depth)
+    pipeline = joblib.load(MODELS_DIR / "kmeans_pipeline.joblib")
     cluster_info = pd.read_csv(MODELS_DIR / "cluster_info.csv")
     cluster_info = cluster_info.dropna(subset=['cluster', 'label'])
     return pipeline, cluster_info
