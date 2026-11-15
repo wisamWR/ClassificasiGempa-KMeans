@@ -20,3 +20,6 @@ venv/
 Thumbs.db
 .vscode/
 .idea/
+
+# Data olahan besar, dibuat ulang dengan: python -m gempa.clean
+data/processed/catalog_clean.parquet
