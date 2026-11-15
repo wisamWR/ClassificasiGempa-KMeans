@@ -3,13 +3,12 @@ import pandas as pd
 import numpy as np
 import joblib
 import folium
-import textwrap
 from datetime import datetime
 from pathlib import Path
-from folium.plugins import MarkerCluster, BeautifyIcon
+from folium.plugins import FastMarkerCluster
 from streamlit_folium import st_folium
 from geopy.geocoders import Nominatim
-from geopy.distance import geodesic
+from geopy.exc import GeopyError
 from sklearn.pipeline import Pipeline
 
 # --- 1. Page Config ---
@@ -34,16 +33,16 @@ st.markdown("""
             height: 100%;
         }
         .safety-box {
-            background-color: #f0f2f6; 
-            padding: 20px; 
-            border-radius: 10px; 
+            background-color: #f0f2f6;
+            padding: 20px;
+            border-radius: 10px;
             margin-top: 20px;
             border-left: 5px solid #ff4b4b;
             color: #31333F;
         }
         .safety-header {
-            font-size: 1.5rem; 
-            font-weight: bold; 
+            font-size: 1.5rem;
+            font-weight: bold;
             margin-bottom: 10px;
             color: #0e1117;
         }
@@ -82,6 +81,7 @@ RISK_COLORS = {
     'High': '#fd7e14',      # Orange
     'Very High': '#dc3545'  # Red
 }
+RISK_SHORT = {'Low': 'Low', 'Moderate': 'Mod', 'High': 'High', 'Very High': 'Very'}
 
 RISK_DETAILS = {
     'Low': {'impact': 'Guncangan lemah, dirasakan sedikit orang.', 'advice': 'Tetap tenang, rutinitas normal.', 'bg': 'rgba(40, 167, 69, 0.2)'},
@@ -90,7 +90,51 @@ RISK_DETAILS = {
     'Very High': {'impact': 'Kerusakan masif, potensi rubuh total.', 'advice': 'SEGERA EVAKUASI ke area terbuka. Hindari gedung.', 'bg': 'rgba(220, 53, 69, 0.2)'}
 }
 
+MAP_DEFAULT_CENTER = [-2.5, 118.0]
+MAX_MAP_POINTS = 2000
+# Batas wilayah katalog (lat, lon) agar hasil geocoding tidak nyasar ke luar area data
+GEOCODE_VIEWBOX = [(-12.0, 94.0), (7.0, 142.0)]
+# Key widget yang dikembalikan ke default saat Reset Filter
+FILTER_KEYS = ['filter_start_date', 'filter_end_date', 'filter_risks', 'search_query_input', 'radius_input']
+
+# Marker lingkaran berwarna untuk FastMarkerCluster: row = [lat, lon, warna, popup]
+MARKER_CALLBACK = """
+function (row) {
+    var marker = L.circleMarker(new L.LatLng(row[0], row[1]), {
+        radius: 7, color: row[2], fillColor: row[2], fillOpacity: 0.85, weight: 1
+    });
+    marker.bindPopup(row[3]);
+    return marker;
+}
+"""
+
 def get_color(label): return RISK_COLORS.get(label, 'gray')
+
+def haversine_km(lat1, lon1, lat2, lon2):
+    """Jarak great-circle (km) dari satu titik ke array titik."""
+    lat1, lon1, lat2, lon2 = map(np.radians, (lat1, lon1, lat2, lon2))
+    a = np.sin((lat2 - lat1) / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2 - lon1) / 2) ** 2
+    return 2 * 6371.0 * np.arcsin(np.sqrt(a))
+
+def balanced_sample(data, n, by='label', seed=42):
+    """Water filling: kuota dibagi rata per label, sisa kuota label kecil dialihkan ke label lain."""
+    if len(data) <= n:
+        return data
+    counts = data[by].value_counts().sort_values()
+    quotas, remaining = {}, n
+    for i, (lbl, cnt) in enumerate(counts.items()):
+        take = min(cnt, remaining // (len(counts) - i))
+        quotas[lbl] = take
+        remaining -= take
+    return pd.concat([data[data[by] == lbl].sample(q, random_state=seed) for lbl, q in quotas.items()])
+
+@st.cache_data(show_spinner=False, ttl=24 * 3600)
+def geocode(query):
+    geolocator = Nominatim(user_agent="klasifikasi-gempa-kmeans-viewer")
+    location = geolocator.geocode(query, timeout=10, viewbox=GEOCODE_VIEWBOX, bounded=True)
+    if location is None:
+        return None
+    return {'lat': location.latitude, 'lon': location.longitude, 'address': location.address}
 
 # --- 2. Load Data & Models ---
 # Path relatif terhadap root project, jadi app bisa dijalankan dari folder mana pun
@@ -136,43 +180,39 @@ except Exception as e:
 # --- A. Header (MAIN PAGE) ---
 st.title("🌋 Earthquake Risk Viewer")
 
-# --- Logic: Get Search from Session State (Defined at bottom) ---
-search_query = st.session_state.get('search_query_input', '')
-
 # Search Logic Processing
 search_context = None
 
 # --- Logic: Get Inputs from Session State (Defined at bottom) ---
-search_query = st.session_state.get('search_query_input', '')
+search_query = st.session_state.get('search_query_input', '').strip()
 search_radius = st.session_state.get('radius_input', 200)
 
 
 if search_query:
-    geolocator = Nominatim(user_agent="geo_earthquake_app")
     try:
-        location = geolocator.geocode(search_query)
-        if location:
-            search_lat, search_lon = location.latitude, location.longitude
-            search_context = {'lat': search_lat, 'lon': search_lon, 'address': location.address}
-        else:
-            if 'search_query_input' in st.session_state: # Only warn if input exists
-                 st.warning("Lokasi tidak ditemukan.")
-    except:
+        search_context = geocode(search_query)
+        if search_context is None:
+            st.warning("Lokasi tidak ditemukan.")
+    except GeopyError:
         st.warning("Gagal koneksi geocoding.")
 
 # Filter Data Global (Sidebar Filters + Search)
 # --- Sidebar Filters ---
 st.sidebar.title("🛠️ Tools & Filter")
 if st.sidebar.button("🔄 Reset Filter"):
-    st.session_state.clear()
+    for key in FILTER_KEYS:
+        st.session_state.pop(key, None)
     st.rerun()
 
+# min/max eksplisit: default Streamlit membatasi pilihan hanya ±10 tahun dari nilai awal
+data_start, data_end = df['time'].min().date(), df['time'].max().date()
+min_date = st.sidebar.date_input("Tanggal Awal", data_start, min_value=data_start, max_value=data_end, key='filter_start_date')
+max_date = st.sidebar.date_input("Tanggal Akhir", data_end, min_value=data_start, max_value=data_end, key='filter_end_date')
+selected_risks = st.sidebar.multiselect("Filter Risiko", RISK_ORDER, default=RISK_ORDER, key='filter_risks')
 
-
-
-min_date = st.sidebar.date_input("Tanggal Awal", df['time'].min().date())
-max_date = st.sidebar.date_input("Tanggal Akhir", df['time'].max().date())
-selected_risks = st.sidebar.multiselect("Filter Risiko", RISK_ORDER, default=RISK_ORDER)
+if min_date > max_date:
+    st.sidebar.warning("Tanggal Awal setelah Tanggal Akhir, rentang ditukar otomatis.")
+    min_date, max_date = max_date, min_date
 
 # Base Filter
 filtered = df[
@@ -182,34 +222,26 @@ filtered = df[
 ]
 
 # Apply Search Filter
-map_center = [filtered['latitude'].mean(), filtered['longitude'].mean()] if not filtered.empty else [0, 0]
+map_center = [filtered['latitude'].mean(), filtered['longitude'].mean()] if not filtered.empty else MAP_DEFAULT_CENTER
 map_zoom = 5
 
 if search_context:
     map_center = [search_context['lat'], search_context['lon']]
     map_zoom = 8
-    
-    # Distance Filter
-    def calc_dist(row):
-        return geodesic((search_context['lat'], search_context['lon']), (row['latitude'], row['longitude'])).km
-    
-    deg_radius = search_radius / 111.0
-    bbox = filtered[
-        (filtered['latitude'].between(search_context['lat'] - deg_radius, search_context['lat'] + deg_radius)) &
-        (filtered['longitude'].between(search_context['lon'] - deg_radius, search_context['lon'] + deg_radius))
-    ].copy()
-    
-    if not bbox.empty:
-        bbox['distance'] = bbox.apply(calc_dist, axis=1)
-        filtered = bbox[bbox['distance'] <= search_radius]
-        
+
+    # Distance Filter (lingkaran radius sebenarnya, bukan kotak lat/lon)
+    distance = haversine_km(search_context['lat'], search_context['lon'],
+                            filtered['latitude'].to_numpy(), filtered['longitude'].to_numpy())
+    filtered = filtered.assign(distance=distance)
+    filtered = filtered[filtered['distance'] <= search_radius]
+
     # Enrich Context
     if not filtered.empty:
         dom_label = filtered['label'].mode()[0]
         search_context['dominant_risk'] = dom_label
         search_context['count'] = len(filtered)
         search_context['advice'] = RISK_DETAILS[dom_label]['advice']
-        
+
 
 # --- B. Metrics ---
 st.divider()
@@ -227,10 +259,10 @@ for i, (_, row) in enumerate(cluster_info_sorted.iterrows()):
     det = RISK_DETAILS.get(lbl, {})
     with info_cols[i]:
         st.markdown(f"""
-        <div style="background-color: #262730; border-top: 4px solid {clr}; padding: 15px; border-radius: 8px; height: 100%;">
+        <div style="background-color: rgba(128, 128, 128, 0.08); border-top: 4px solid {clr}; padding: 15px; border-radius: 8px; height: 100%;">
             <h3 style="margin:0 0 5px 0; color: {clr};">{lbl}</h3>
             <p style="font-size: 0.8rem; margin-bottom:5px;"><b>Efek:</b> {det.get('impact')}</p>
-            <p style="font-size: 0.8rem; color:#FFD700;"><b>Saran:</b> {det.get('advice')}</p>
+            <p style="font-size: 0.8rem;"><b>Saran:</b> {det.get('advice')}</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -239,7 +271,7 @@ if search_context and 'dominant_risk' in search_context:
     r_lbl = search_context['dominant_risk']
     r_clr = get_color(r_lbl)
     st.markdown(f"""
-    <div style="margin: 20px 0; padding: 20px; border: 2px solid {r_clr}; border-radius: 10px; background-color: rgba(255,255,255,0.05);">
+    <div style="margin: 20px 0; padding: 20px; border: 2px solid {r_clr}; border-radius: 10px; background-color: rgba(128, 128, 128, 0.05);">
         <h3 style="margin:0;">📍 Analisis Wilayah: {search_context['address']}</h3>
         <p>Ditemukan <b>{search_context['count']}</b> gempa dalam radius {search_radius}km.</p>
         <h2 style="color: {r_clr};">Status: {r_lbl}</h2>
@@ -251,25 +283,23 @@ elif search_context:
 
 # --- E. Map ---
 m = folium.Map(location=map_center, zoom_start=map_zoom, prefer_canvas=True)
-marker_cluster = MarkerCluster().add_to(m)
 
-# Sample Data for Map Performance
-plot_df = filtered.sample(min(len(filtered), 2000), random_state=42) if len(filtered) > 2000 else filtered
-
-for _, row in plot_df.iterrows():
-    lbl = row['label']
-    clr = get_color(lbl)
-    folium.Marker(
-        [row['latitude'], row['longitude']],
-        icon=BeautifyIcon(icon_shape='marker', number=lbl[0], border_color=clr, background_color=clr, text_color='white'),
-        popup=f"Risk: {lbl}<br>Mag: {row[mag_col]}"
-    ).add_to(marker_cluster)
+# Sampel seimbang per label agar label minoritas tetap terlihat dan peta tetap ringan
+plot_df = balanced_sample(filtered, MAX_MAP_POINTS)
+points = [
+    [row.latitude, row.longitude, get_color(row.label),
+     f"Risk: {row.label}<br>Mag: {getattr(row, mag_col):.1f}<br>Depth: {row.depth:.0f} km"]
+    for row in plot_df.itertuples()
+]
+FastMarkerCluster(points, callback=MARKER_CALLBACK).add_to(m)
 
 if search_context:
     folium.Marker([search_context['lat'], search_context['lon']], icon=folium.Icon(color='red', icon='star')).add_to(m)
     folium.Circle([search_context['lat'], search_context['lon']], radius=search_radius*1000, color='red', fill=True, fill_opacity=0.1, popup=f"Radius: {search_radius}km").add_to(m)
 
 st_folium(m, height=500, use_container_width=True, returned_objects=[])
+if len(plot_df) < len(filtered):
+    st.caption(f"Peta menampilkan {len(plot_df):,} dari {len(filtered):,} gempa (sampel seimbang per label risiko).")
 
 # --- F. Search Input (Moved Below Map) ---
 st.markdown("### 🔍 Cari Lokasi")
@@ -293,17 +323,16 @@ st.markdown("---")
 st.subheader("🛡️ Analisis Keselamatan: Perspektif Musiman")
 
 if search_context:
-    # 1. Historical Analysis for Current Month
-    df_hist_loc = bbox if 'bbox' in locals() and not bbox.empty else filtered # Use bbox if available
-    
+    # 1. Historical Analysis for Current Month (data sudah difilter radius)
+    df_hist_loc = filtered
+
     if not df_hist_loc.empty:
-        df_hist_loc['month'] = df_hist_loc['time'].dt.month
-        df_month = df_hist_loc[df_hist_loc['month'] == now.month]
-        
+        df_month = df_hist_loc[df_hist_loc['time'].dt.month == now.month]
+
         hist_total = len(df_month)
         hist_high = len(df_month[df_month['label'].isin(['High', 'Very High'])])
         hist_pct = (hist_high / hist_total * 100) if hist_total > 0 else 0
-        
+
         # Risk Logic with Explained Triggers
         if hist_total == 0:
             s_risk, s_color = "DATA TIDAK CUKUP", "gray"
@@ -330,10 +359,10 @@ if search_context:
 
         # Display Layout: 50-50 Split for Status & Stats within Equal Containers
         c1, c2 = st.columns(2)
-        
+
         # Determine Dominant Cluster for Display
         dom_cluster = df_month['label'].mode()[0] if not df_month.empty else '-'
-        
+
         # FIXED HEIGHT CONFIG
         CARD_HEIGHT = 350
 
@@ -345,36 +374,26 @@ if search_context:
                 <p style="margin:0;">{s_msg}</p>
             </div>
             """, unsafe_allow_html=True)
-            
+
         with c2:
             with st.container(height=CARD_HEIGHT, border=True):
                 # Header: Centered, No Icon
                 st.markdown(f"<h4 style='text-align: center; margin-top: 0;'>Statistik {current_month_name} (Histori)</h4>", unsafe_allow_html=True)
-                
+
                 # Section 1: Key Metrics (Data is already from df_month)
                 m1, m2, m3 = st.columns(3)
                 with m1: st.metric("Total Kejadian", hist_total)
                 with m2: st.metric("Max Magnitude", f"{df_month[mag_col].max():.1f}" if not df_month.empty else "0")
                 with m3: st.metric("Dominant Risk", dom_cluster)
-                
+
                 st.divider()
-                
+
                 # Section 2: Risk Percentage Breakdown
-                st.caption("Persentase Risiko per Resiko")
-                b1, b2, b3, b4 = st.columns(4)
-                with b1: 
-                    st.markdown(f":green[**Low**]")
-                    st.markdown(f"**{cluster_stats['Low']:.0f}%**")
-                with b2: 
-                    st.markdown(f":orange[**Mod**]")
-                    st.markdown(f"**{cluster_stats['Moderate']:.0f}%**")
-                with b3: 
-                    st.markdown(f":orange[**High**]")
-                    st.markdown(f"**{cluster_stats['High']:.0f}%**")
-                with b4: 
-                    st.markdown(f":red[**Very**]")
-                    st.markdown(f"**{cluster_stats['Very High']:.0f}%**")
-            
+                st.caption("Persentase per Label Risiko")
+                for col, r in zip(st.columns(4), RISK_ORDER):
+                    with col:
+                        st.markdown(f"<span style='color:{get_color(r)}; font-weight:bold;'>{RISK_SHORT[r]}</span><br><b>{cluster_stats[r]:.0f}%</b>", unsafe_allow_html=True)
+
         # Full Width Guide Below
         st.markdown("### 💡 Panduan Keselamatan Lengkap")
         with st.expander("Buka Panduan Langkah demi Langkah", expanded=True):
@@ -386,7 +405,7 @@ if search_context:
             with tab3:
                 for t in TIPS_SETELAH_GEMPA: st.success(t)
     else:
-        st.info("Pilih lokasi di peta atau cari kota untuk melihat analisis keselamatan spesifik.")
+        st.info("Tidak ada data gempa dalam radius ini untuk dianalisis. Perbesar radius atau ubah filter.")
 else:
     st.info("ℹ️ **Cari lokasi** di bagian atas untuk melihat Analisis Keselamatan Musiman & Panduan Evakuasi.")
 
@@ -396,42 +415,16 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("⚡ Prediksi Manual")
 
-    # Mini Map for Coordinate Input
-    st.markdown("<small>Klik peta untuk atur lokasi (Ganti Lat/Lon Manual):</small>", unsafe_allow_html=True)
-    mini_map = folium.Map(location=[-2.5, 118.0], zoom_start=4, width="100%", height=150, control_scale=True)
-    mini_map.add_child(folium.LatLngPopup()) 
-    map_data = st_folium(mini_map, height=150, width=280, key="mini_map_prediction")
-
-    # Handle Map Click
-    if map_data and map_data.get('last_clicked'):
-        st.session_state['manual_lat'] = map_data['last_clicked']['lat']
-        st.session_state['manual_lon'] = map_data['last_clicked']['lng']
-
-    # Default to 0.0 if not in state
-    if 'manual_lat' not in st.session_state: st.session_state['manual_lat'] = 0.0
-    if 'manual_lon' not in st.session_state: st.session_state['manual_lon'] = 0.0
-
-    # Display Selected Coordinates (Read-Only)
-    st.markdown(f"""
-    <div style="font-size:0.8rem; margin-bottom:10px; color:#aaa;">
-        📍 Terpilih: <b>{st.session_state['manual_lat']:.4f}, {st.session_state['manual_lon']:.4f}</b>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Other Inputs
-    p3 = st.number_input("Mag", 5.0, step=0.1)
-    p4 = st.number_input("Depth", 10.0, step=10.0)
+    p3 = st.number_input("Magnitudo", min_value=0.0, max_value=10.0, value=5.0, step=0.1)
+    p4 = st.number_input("Kedalaman (km)", min_value=0.0, max_value=800.0, value=10.0, step=10.0)
 
     if st.button("Hitung Risiko"):
         try:
-            # Use values from session state directly
-            # FIX: Model expects 2 features (Mag, Depth), not 4 (Lat, Lon, Mag, Depth) based on error
-            arr = np.array([[p3, p4]])
-            # Use pipeline if available, else reconstructed
-            # Note: In load_model we return 'pipeline', so it should be available globally or passed
-            res = pipeline.predict(arr)[0] # Pipeline handles scaling
+            # Model dilatih dengan 2 fitur (mag, depth); pipeline menangani scaling
+            arr = pd.DataFrame([[p3, p4]], columns=['mag', 'depth'])
+            res = pipeline.predict(arr)[0]
             lbl_res = id_to_label[res]
-            
+
             # Result Display
             r_clr = get_color(lbl_res)
             st.markdown(f"""
@@ -440,10 +433,5 @@ with st.sidebar:
             </div>
             """, unsafe_allow_html=True)
             st.caption(RISK_DETAILS[lbl_res]['advice'])
-        except Exception as e: 
+        except Exception as e:
             st.error(f"Error: {e}")
-
-    st.markdown("---")
-    with st.expander("📂 Upload Data"):
-        up = st.file_uploader("CSV/TSV", type=['csv','tsv'])
-        if up: st.write("Fitur upload aktif (logika disederhanakan).")
