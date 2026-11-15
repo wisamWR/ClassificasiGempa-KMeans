@@ -39,6 +39,8 @@ Mengelompokkan data gempa (k = 4, dipilih dengan silhouette score) berdasarkan k
 
 Latitude/longitude sengaja tidak dipakai agar klaster tidak terbentuk karena lokasi geografis. Tiap klaster diberi label **Low / Moderate / High / Very High** dengan mengurutkan estimasi intensitas episentrum Gutenberg–Richter (1956) dari centroid-nya.
 
+> ⚠️ Label bersifat relatif antar-klaster, bukan risiko absolut per gempa. Contoh: gempa kecil dangkal (M3.0 / 20 km) berlabel *High*, sedangkan gempa besar kedalaman menengah (M7.0 / 150 km) berlabel *Moderate*. Lihat bagian "Catatan Keterbatasan Label" di notebook.
+
 ### 3. 🔍 Filter & Pencarian Lokasi
 
 - **Rentang Tanggal:** Pilih periode waktu tertentu.
@@ -90,11 +92,24 @@ Pastikan Anda memiliki [Python](https://www.python.org/) yang terinstall di komp
 
 ### Melatih Ulang Model
 
-Install dependency notebook, lalu jalankan `notebooks/earthquake_clustering.ipynb` dari folder `notebooks/` (Restart & Run All). Notebook membaca `data/raw/` dan menulis ulang artifact di `models/` serta `data/processed/`.
+Logika training ada di paket `src/gempa/`. Model bisa dilatih ulang lewat CLI atau notebook; keduanya memakai fungsi yang sama, membaca `data/raw/`, dan menulis ulang artifact di `models/` serta `data/processed/`.
 
 ```bash
-pip install -r requirements-dev.txt
+pip install -r requirements-dev.txt   # termasuk paket gempa (pip install -e .)
+
+# Opsi 1: CLI (dari root project)
+python -m gempa.train
+
+# Opsi 2: notebook (jalankan dari folder notebooks/, Restart & Run All)
 jupyter notebook notebooks/earthquake_clustering.ipynb
+```
+
+Versi scikit-learn saat training dicatat di `models/metadata.json` dan harus sama dengan versi di `requirements.txt`.
+
+### Menjalankan Test
+
+```bash
+pytest
 ```
 
 ---
@@ -104,21 +119,27 @@ jupyter notebook notebooks/earthquake_clustering.ipynb
 ```
 app/
   streamlit_app.py                 🧠 Kode utama aplikasi (UI & logic)
+src/gempa/
+  data.py                          📥 Load & bersihkan katalog BMKG
+  intensity.py                     📐 Intensitas episentrum Gutenberg–Richter
+  train.py                         🤖 Pencarian k, training, pelabelan, simpan artifact (CLI)
+  paths.py                         📁 Lokasi file data & model
 notebooks/
-  earthquake_clustering.ipynb      🔬 Eksplorasi, training, dan evaluasi K-Means
+  earthquake_clustering.ipynb      🔬 Eksplorasi, visualisasi, dan evaluasi K-Means
+tests/                             🧪 Unit test (pytest)
 data/
   raw/katalog_gempa_v2.tsv         💾 Katalog gempa BMKG (data mentah)
-  processed/earthquakes_with_cluster.csv  🗂️ Data gempa + label klaster (dipakai app)
+  processed/earthquakes_with_cluster.parquet  🗂️ Data gempa + label klaster (dipakai app)
 models/
-  scaler.joblib                    📏 MinMaxScaler (mag, depth)
-  kmeans_model.joblib              🤖 Model K-Means terlatih
-  cluster_info.csv                 📊 Centroid, severity score, dan label tiap klaster
-  cluster_remap.pkl                🔁 Mapping ID klaster → label risiko
+  kmeans_pipeline.joblib           🤖 Pipeline MinMaxScaler + K-Means terlatih
+  cluster_info.csv                 📊 Rata-rata fitur, severity score, dan label tiap klaster
+  metadata.json                    🧾 Parameter, metrik, mapping label, versi library
 docs/
   PENJELASAN_PERUBAHAN.md          📝 Catatan perubahan metodologi
   informasi_keselamatan_streamlit.txt  🛡️ Rancangan fitur informasi keselamatan
+pyproject.toml                     📦 Konfigurasi paket gempa & pytest
 requirements.txt                   📋 Dependency aplikasi
-requirements-dev.txt               🧪 Dependency tambahan untuk notebook
+requirements-dev.txt               🧪 Dependency notebook, training, dan test
 ```
 
 ---
