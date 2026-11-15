@@ -27,8 +27,8 @@ Visualisasi interaktif dan analisis persebaran gempa bumi menggunakan **Machine 
 Visualisasi titik gempa historis (katalog BMKG, November 2008 – Oktober 2025) di atas peta interaktif. Setiap label risiko ditandai dengan warna berbeda.
 
 - **Marker Clustering:** Titik gempa dikelompokkan saat zoom-out agar peta tetap rapi.
-- **Detail Popup:** Klik marker untuk melihat label risiko dan magnitudo.
-- **Sampling:** Peta menampilkan maksimal 2.000 titik (sampel acak) agar tetap ringan.
+- **Detail Popup:** Klik marker untuk melihat label risiko, magnitudo, dan kedalaman.
+- **Balanced Sampling (Water Filling):** Peta menampilkan maksimal 2.000 titik. Kuota dibagi rata per label risiko; sisa kuota dari label yang datanya sedikit dialihkan ke label lain, sehingga label minoritas tetap terlihat.
 
 ### 2. 🤖 K-Means Clustering
 
