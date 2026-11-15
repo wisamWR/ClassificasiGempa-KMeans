@@ -18,6 +18,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 
 from gempa import paths
+from gempa.clean import clean_catalog
 from gempa.data import load_catalog
 from gempa.intensity import epicentral_intensity
 
@@ -30,8 +31,9 @@ FINAL_N_INIT = 10
 # Silhouette O(n^2): hitung pada sampel acak tetap (seed sama) agar cepat & konsisten
 SILHOUETTE_SAMPLE = 20_000
 # Kolom data olahan yang disimpan untuk aplikasi
-PROCESSED_COLUMNS = ["eventID", "time", "latitude", "longitude", "mag", "mag_type",
-                     "depth", "location", "cluster", "label"]
+PROCESSED_COLUMNS = ["eventID", "time", "latitude", "longitude", "mag", "mag_type", "mw",
+                     "depth", "depth_fixed", "location", "intensity", "mmi_class",
+                     "is_mainshock", "above_mc", "suspect_event", "cluster", "label"]
 
 
 @dataclass
@@ -50,6 +52,12 @@ class TrainResult:
     @property
     def label_map(self):
         return dict(zip(self.summary["cluster"], self.summary["label"]))
+
+
+def prepare_events(catalog_path=paths.RAW_CATALOG):
+    """Katalog mentah -> katalog bersih (Mw, Mc, declustering, intensitas). Lihat gempa.clean."""
+    events, _ = clean_catalog(load_catalog(catalog_path))
+    return events
 
 
 def build_pipeline(k, n_init=FINAL_N_INIT, random_state=RANDOM_STATE):
@@ -183,7 +191,7 @@ def main(argv=None):
     parser.add_argument("--processed-dir", type=Path, default=paths.PROCESSED_DIR)
     args = parser.parse_args(argv)
 
-    df = load_catalog(args.catalog)
+    df = prepare_events(args.catalog)
     print(f"Loaded {len(df):,} events from {args.catalog}")
 
     result = train(df, k=args.k, sample_size=args.silhouette_sample)

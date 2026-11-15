@@ -1,0 +1,241 @@
+{
+  "n_raw": 131131,
+  "n_clean": 131131,
+  "removed": {
+    "duplicated_eventID": 0,
+    "outside_area": 0,
+    "negative_depth": 0
+  },
+  "depth_fixed": 45711,
+  "low_quality_location": 42793,
+  "suspect_event": 254,
+  "magnitude": {
+    "relations": {
+      "M": {
+        "slope": 1.0166,
+        "intercept": -0.2207,
+        "valid_range": [
+          2.93,
+          7.16
+        ],
+        "source": "Taruna & Pratiwi (2021)"
+      },
+      "MLv": {
+        "slope": 0.7353,
+        "intercept": 1.0722,
+        "valid_range": [
+          2.93,
+          7.57
+        ],
+        "source": "Taruna & Pratiwi (2021)"
+      },
+      "ML": {
+        "slope": 0.6424,
+        "intercept": 1.5595,
+        "valid_range": [
+          1.75,
+          7.82
+        ],
+        "source": "Taruna & Pratiwi (2021)"
+      },
+      "mb": {
+        "slope": 1.1993,
+        "intercept": -1.2261,
+        "valid_range": [
+          3.67,
+          6.99
+        ],
+        "source": "Taruna & Pratiwi (2021)"
+      }
+    },
+    "method_counts": {
+      "conversion": 127343,
+      "native": 3774,
+      "approx": 14
+    },
+    "extrapolated": 33864
+  },
+  "completeness": {
+    "method": "maximum curvature + 0.2 (bin 0.1)",
+    "mc_overall": 3.6,
+    "by_year": [
+      {
+        "year": 2008,
+        "n_events": 318,
+        "mc": 4.7
+      },
+      {
+        "year": 2009,
+        "n_events": 3519,
+        "mc": 4.5
+      },
+      {
+        "year": 2010,
+        "n_events": 6168,
+        "mc": 3.5
+      },
+      {
+        "year": 2011,
+        "n_events": 4441,
+        "mc": 4.2
+      },
+      {
+        "year": 2012,
+        "n_events": 6556,
+        "mc": 3.5
+      },
+      {
+        "year": 2013,
+        "n_events": 3877,
+        "mc": 4.0
+      },
+      {
+        "year": 2014,
+        "n_events": 4633,
+        "mc": 4.0
+      },
+      {
+        "year": 2015,
+        "n_events": 5271,
+        "mc": 3.8
+      },
+      {
+        "year": 2016,
+        "n_events": 5530,
+        "mc": 3.8
+      },
+      {
+        "year": 2017,
+        "n_events": 6942,
+        "mc": 3.7
+      },
+      {
+        "year": 2018,
+        "n_events": 9271,
+        "mc": 3.6
+      },
+      {
+        "year": 2019,
+        "n_events": 11445,
+        "mc": 3.8
+      },
+      {
+        "year": 2020,
+        "n_events": 9142,
+        "mc": 3.1
+      },
+      {
+        "year": 2021,
+        "n_events": 11199,
+        "mc": 3.1
+      },
+      {
+        "year": 2022,
+        "n_events": 10353,
+        "mc": 3.1
+      },
+      {
+        "year": 2023,
+        "n_events": 11216,
+        "mc": 3.6
+      },
+      {
+        "year": 2024,
+        "n_events": 7444,
+        "mc": 3.3
+      },
+      {
+        "year": 2025,
+        "n_events": 13806,
+        "mc": 3.3
+      }
+    ],
+    "above_mc": 60266
+  },
+  "declustering": {
+    "method": "Gardner & Knopoff (1974), window aftershock (window HMTK)",
+    "foreshock_ratio": 0.0,
+    "mainshocks_symmetric_window": 32506,
+    "mainshocks": 49632,
+    "dependent": 81245,
+    "excluded_suspect": 254,
+    "largest_sequences": [
+      {
+        "eventID": "bmg2019svqk",
+        "time": "2019-09-25T23:46:44.673309+00:00",
+        "mw": 6.46,
+        "location": "Seram, Indonesia",
+        "n_events": 1072
+      },
+      {
+        "eventID": "bmg2017klni",
+        "time": "2017-05-29T14:35:27.497805+00:00",
+        "mw": 6.63,
+        "location": "Sulawesi, Indonesia",
+        "n_events": 1042
+      },
+      {
+        "eventID": "bmg2019wiks",
+        "time": "2019-11-14T16:17:42.991642+00:00",
+        "mw": 7.15,
+        "location": "Northern Molucca Sea",
+        "n_events": 858
+      },
+      {
+        "eventID": "bmg2019hdky",
+        "time": "2019-04-12T11:40:50.439722+00:00",
+        "mw": 6.78,
+        "location": "Sulawesi, Indonesia",
+        "n_events": 739
+      },
+      {
+        "eventID": "bmg2021ykge",
+        "time": "2021-12-14T03:20:23.200204+00:00",
+        "mw": 7.43,
+        "location": "Flores Sea",
+        "n_events": 658
+      },
+      {
+        "eventID": "bmg2025ebba",
+        "time": "2025-02-27T11:47:57.189494+00:00",
+        "mw": 4.53,
+        "location": "Sulawesi, Indonesia",
+        "n_events": 594
+      },
+      {
+        "eventID": "bmg2014wjez",
+        "time": "2014-11-15T02:31:44.119639+00:00",
+        "mw": 7.03,
+        "location": "Northern Molucca Sea",
+        "n_events": 587
+      },
+      {
+        "eventID": "bmg2023bfnq",
+        "time": "2023-01-18T06:06:16.115854+00:00",
+        "mw": 7.22,
+        "location": "Northern Molucca Sea",
+        "n_events": 562
+      },
+      {
+        "eventID": "bmg2023bfcs",
+        "time": "2023-01-18T00:34:46.442015+00:00",
+        "mw": 6.32,
+        "location": "Minahassa Peninsula, Sulawesi",
+        "n_events": 555
+      },
+      {
+        "eventID": "bmg2019nevb",
+        "time": "2019-07-07T15:08:42.016671+00:00",
+        "mw": 6.97,
+        "location": "Northern Molucca Sea",
+        "n_events": 472
+      }
+    ]
+  },
+  "mmi_class_counts": {
+    "I-II": 36745,
+    "III-IV": 56430,
+    "V-VI": 35012,
+    "VII+": 2944
+  }
+}
