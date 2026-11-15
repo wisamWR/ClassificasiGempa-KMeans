@@ -5,6 +5,11 @@
 > episentrum Gutenberg–Richter (1956), `I0 = 1.5·M − 3.5·log10(h) + 3.0`
 > (commit `097e942` dan `52114f4`). Penjelasan rumus terbaru ada di notebook
 > `notebooks/earthquake_clustering.ipynb` bagian "Penjelasan Logika Risk Clustering".
+>
+> Sejak pipeline training dipindah ke `src/gempa/` (November 2026), artifact
+> `scaler.joblib`, `kmeans_model.joblib`, dan `cluster_remap.pkl` di bagian 5 diganti
+> `models/kmeans_pipeline.joblib` + `models/metadata.json`, dan data olahan memakai
+> `data/processed/earthquakes_with_cluster.parquet`.
 
 ---
 
