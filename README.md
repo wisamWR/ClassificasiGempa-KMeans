@@ -24,13 +24,23 @@ Visualisasi interaktif dan analisis persebaran gempa bumi menggunakan **Machine 
 
 ### 1. 🗺️ Peta Interaktif
 
-Visualisasi titik gempa historis (katalog BMKG, November 2008 – Oktober 2025) di atas peta interaktif. Setiap label risiko ditandai dengan warna berbeda.
+Visualisasi titik gempa historis (katalog BMKG, November 2008 – Oktober 2025) di atas peta interaktif. Warna marker menunjukkan **estimasi intensitas di episentrum (skala MMI)** tiap gempa.
 
 - **Marker Clustering:** Titik gempa dikelompokkan saat zoom-out agar peta tetap rapi.
-- **Detail Popup:** Klik marker untuk melihat label risiko, magnitudo, dan kedalaman.
-- **Balanced Sampling (Water Filling):** Peta menampilkan maksimal 2.000 titik. Kuota dibagi rata per label risiko; sisa kuota dari label yang datanya sedikit dialihkan ke label lain, sehingga label minoritas tetap terlihat.
+- **Detail Popup:** Mw, magnitudo asli, kedalaman, kelas MMI, profil klaster K-Means, status gempa utama/susulan, dan waktu (UTC).
+- **Balanced Sampling (Water Filling):** Peta menampilkan maksimal 2.000 titik. Kuota dibagi rata per kelas intensitas; sisa kuota dari kelas yang datanya sedikit dialihkan ke kelas lain.
 
-### 2. 🤖 K-Means Clustering
+### 2. 🧹 Katalog Bersih
+
+Langkah `python -m gempa.clean` (dokumentasi lengkap di `notebooks/data_cleaning.ipynb`):
+
+- **Homogenisasi magnitudo ke Mw** dengan relasi Taruna & Pratiwi (2021); pada pasangan Mw mekanisme fokal di katalog ini biasnya ≤ 0,02.
+- **Magnitude of completeness (Mc)** per tahun (maximum curvature + 0,2): turun dari ±4,5 (2008) ke ±3,1 (2020–2022).
+- **Declustering Gardner & Knopoff (1974)** untuk memisahkan gempa utama dan gempa susulan.
+- **Flag kualitas:** kedalaman default, lokasi kurang terikat, dan event semu (Mw ≥ 5 dengan < 10 fase dan celah azimut > 180°).
+- **Intensitas per event:** I₀ = 1,5·Mw − 3,5·log₁₀(h) + 3 (Gutenberg–Richter 1956), dipetakan ke kelas MMI I-II / III-IV / V-VI / VII+.
+
+### 3. 🤖 K-Means Clustering
 
 Mengelompokkan data gempa (k = 4, dipilih dengan silhouette score) berdasarkan karakteristik fisik:
 
@@ -39,21 +49,22 @@ Mengelompokkan data gempa (k = 4, dipilih dengan silhouette score) berdasarkan k
 
 Latitude/longitude sengaja tidak dipakai agar klaster tidak terbentuk karena lokasi geografis. Tiap klaster diberi label **Low / Moderate / High / Very High** dengan mengurutkan estimasi intensitas episentrum Gutenberg–Richter (1956) dari centroid-nya.
 
-> ⚠️ Label bersifat relatif antar-klaster, bukan risiko absolut per gempa. Contoh: gempa kecil dangkal (M3.0 / 20 km) berlabel *High*, sedangkan gempa besar kedalaman menengah (M7.0 / 150 km) berlabel *Moderate*. Lihat bagian "Catatan Keterbatasan Label" di notebook.
+> ⚠️ Label bersifat relatif antar-klaster, bukan risiko absolut per gempa. Lebih dari seperempat event berlabel *High* berintensitas MMI I–II (tidak terasa), dan gempa besar kedalaman menengah (M7.0 / 150 km) berlabel *Moderate*. Karena itu aplikasi menampilkan label ini sebagai **profil klaster**, sedangkan warna dan rekomendasi memakai kelas MMI per gempa.
 
-### 3. 🔍 Filter & Pencarian Lokasi
+### 4. 🔍 Filter & Pencarian Lokasi
 
-- **Rentang Tanggal:** Pilih periode waktu tertentu.
-- **Label Risiko:** Tampilkan hanya label tertentu.
-- **Cari Lokasi:** Ketik nama kota/daerah dan atur radius pencarian (10–500 km) untuk melihat ringkasan gempa di sekitarnya.
+- **Rentang Tanggal**, **Kelas Intensitas (MMI)**, dan **Profil Klaster (K-Means)**.
+- **Hanya gempa utama:** sembunyikan gempa susulan hasil declustering.
+- **Sembunyikan event semu** (aktif secara default).
+- **Cari Lokasi:** ketik nama kota/daerah dan atur radius (10–500 km). Ringkasan wilayah berisi gempa terbesar, gempa terbaru, laju gempa utama Mw ≥ 5 per tahun, intensitas tertinggi yang pernah tercatat, dan tabel 10 gempa terbesar.
 
-### 4. ⚡ Prediksi Manual
+### 5. ⚡ Estimasi Manual
 
-Masukkan **Magnitudo** dan **Kedalaman** gempa, lalu model menentukan label risiko klasternya.
+Masukkan **Mw** dan **kedalaman** gempa untuk mendapatkan estimasi kelas intensitas MMI beserta profil klaster K-Means-nya.
 
-### 5. 🛡️ Panduan Keselamatan
+### 6. 🛡️ Panduan Keselamatan
 
-Statistik historis wilayah hasil pencarian pada bulan berjalan, serta panduan sebelum, saat, dan sesudah gempa.
+Panduan sebelum, saat, dan sesudah gempa.
 
 ---
 
@@ -98,7 +109,8 @@ Logika training ada di paket `src/gempa/`. Model bisa dilatih ulang lewat CLI at
 pip install -r requirements-dev.txt   # termasuk paket gempa (pip install -e .)
 
 # Opsi 1: CLI (dari root project)
-python -m gempa.train
+python -m gempa.clean   # opsional: katalog bersih + laporan (data/processed/catalog_*.{parquet,json})
+python -m gempa.train   # sudah menjalankan pembersihan yang sama sebelum training
 
 # Opsi 2: notebook (jalankan dari folder notebooks/, Restart & Run All)
 jupyter notebook notebooks/earthquake_clustering.ipynb
@@ -120,16 +132,24 @@ pytest
 app/
   streamlit_app.py                 🧠 Kode utama aplikasi (UI & logic)
 src/gempa/
-  data.py                          📥 Load & bersihkan katalog BMKG
-  intensity.py                     📐 Intensitas episentrum Gutenberg–Richter
+  data.py                          📥 Load katalog BMKG
+  clean.py                         🧹 Pembersihan katalog & laporan kualitas (CLI)
+  magnitude.py                     📏 Konversi magnitudo ke Mw
+  completeness.py                  📉 Magnitude of completeness (Mc)
+  decluster.py                     🔗 Declustering Gardner–Knopoff
+  intensity.py                     📐 Intensitas episentrum & kelas MMI
+  geo.py                           🌐 Jarak haversine
   train.py                         🤖 Pencarian k, training, pelabelan, simpan artifact (CLI)
   paths.py                         📁 Lokasi file data & model
 notebooks/
+  data_cleaning.ipynb              🧹 Validasi konversi Mw, Mc, kualitas data, declustering
   earthquake_clustering.ipynb      🔬 Eksplorasi, visualisasi, dan evaluasi K-Means
 tests/                             🧪 Unit test (pytest)
 data/
   raw/katalog_gempa_v2.tsv         💾 Katalog gempa BMKG (data mentah)
   processed/earthquakes_with_cluster.parquet  🗂️ Data gempa + label klaster (dipakai app)
+  processed/catalog_report.json    🧾 Laporan pembersihan katalog
+  processed/catalog_clean.parquet  🧹 Katalog bersih lengkap (tidak di-commit, buat dengan gempa.clean)
 models/
   kmeans_pipeline.joblib           🤖 Pipeline MinMaxScaler + K-Means terlatih
   cluster_info.csv                 📊 Rata-rata fitur, severity score, dan label tiap klaster
