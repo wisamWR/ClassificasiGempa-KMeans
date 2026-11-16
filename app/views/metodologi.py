@@ -53,6 +53,11 @@ Bidang nodal (strike/dip/rake) dari katalog BMKG diubah menjadi sumbu tekanan (P
 Jenis sesar mengikuti Frohlich (1992): plunge T > 50° = sesar naik, plunge P > 60° = sesar turun, plunge B > 60° =
 sesar geser, selain itu oblik. Kedua bidang nodal memberi jenis yang sama, karena sumbu P/T/B tidak bergantung pada
 pilihan bidang.
+
+#### 7. Gempa susulan (`gempa.stats.omori_mle`)
+Deret gempa susulan berasal dari declustering Gardner–Knopoff. Peluruhannya dimodelkan dengan relasi Omori–Utsu
+n(t) = K/(t + c)^p yang parameternya ditaksir dengan maximum likelihood (Ogata 1983), memakai gempa susulan ≥ Mc
+antara 0,1 dan 100 hari setelah gempa utama.
 """)
 
 st.markdown("#### Metrik model")
@@ -98,6 +103,7 @@ st.markdown(f"""
 - Gardner, J. K. & Knopoff, L. (1974). Is the sequence of earthquakes in Southern California, with aftershocks removed, Poissonian? *BSSA*, 64(5), 1363–1367.
 - Gutenberg, B. & Richter, C. F. (1944). Frequency of earthquakes in California. *BSSA*, 34(4), 185–188.
 - Gutenberg, B. & Richter, C. F. (1956). Earthquake magnitude, intensity, energy, and acceleration. *BSSA*, 46(2), 105–145.
+- Ogata, Y. (1983). Estimation of the parameters in the modified Omori formula for aftershock frequencies by the maximum likelihood procedure. *J. Phys. Earth*, 31, 115–124.
 - Pusgen (2017). *Peta Sumber dan Bahaya Gempa Indonesia Tahun 2017*.
 - Shi, Y. & Bolt, B. A. (1982). The standard error of the magnitude-frequency b value. *BSSA*, 72(5), 1677–1687.
 - Taruna, R. M. & Pratiwi, A. (2021). Konversi empiris magnitudo menggunakan data gempabumi 1922–2020 di Nusa Tenggara Barat. *Jurnal Sains Teknologi & Lingkungan*, 7(1), 1–12.

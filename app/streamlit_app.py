@@ -22,6 +22,7 @@ pages = {
     ],
     "Analisis": [
         st.Page("views/kategorikan.py", title="Kategorikan Gempa", icon="⚡"),
+        st.Page("views/susulan.py", title="Gempa Susulan", icon="🔁"),
         st.Page("views/eksplorasi.py", title="Eksplorasi Data", icon="📊"),
     ],
     "Informasi": [

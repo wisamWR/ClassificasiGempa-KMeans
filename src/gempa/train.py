@@ -33,7 +33,7 @@ SILHOUETTE_SAMPLE = 20_000
 # Kolom data olahan yang disimpan untuk aplikasi
 PROCESSED_COLUMNS = ["eventID", "time", "latitude", "longitude", "mag", "mag_type", "mw",
                      "depth", "depth_fixed", "location", "intensity", "mmi_class",
-                     "is_mainshock", "above_mc", "suspect_event", "cluster", "label"]
+                     "is_mainshock", "sequence_id", "above_mc", "suspect_event", "cluster", "label"]
 
 
 @dataclass
