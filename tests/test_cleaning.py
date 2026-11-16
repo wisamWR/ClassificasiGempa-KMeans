@@ -93,13 +93,30 @@ def test_clean_catalog_columns_and_suspect_flag():
         "azimuth_gap": [90.0] * (n - 1) + [250.0],
         "location": "Test",
     })
-    clean, report = clean_catalog(df)
+    # Referensi: hanya event e0 (Mw 3.5, tidak diverifikasi) -> event Mw 7 tidak terkonfirmasi
+    reference = pd.DataFrame({"time": [t0], "latitude": [-8.0], "longitude": [100.0]})
+    clean, report = clean_catalog(df, reference=reference)
     expected = {"mw", "mw_method", "mw_extrapolated", "depth_fixed", "low_quality_location", "mc",
                 "above_mc", "suspect_event", "sequence_id", "is_mainshock", "intensity", "mmi_class"}
     assert expected <= set(clean.columns)
     last = clean.iloc[-1]
     assert last["suspect_event"] and not last["is_mainshock"]
     assert report["suspect_event"] == 1
+    assert report["verification"]["checked"] == 1 and report["verification"]["unconfirmed"] == 1
+    assert pd.isna(clean.iloc[0]["reference_match"]) and not last["reference_match"]
     assert clean["depth_fixed"].all()
     # Event lain berjauhan (20 hari, ratusan km): semuanya mainshock
     assert clean["is_mainshock"].sum() == n - 1
+
+
+def test_clean_catalog_keeps_confirmed_large_event():
+    t0 = pd.Timestamp("2021-01-01", tz="UTC")
+    df = pd.DataFrame({
+        "eventID": ["big"], "time": [t0], "latitude": [-2.0], "longitude": [120.0],
+        "mag": [6.5], "mag_type": ["Mw"], "depth": [20], "phasecount": [80.0], "azimuth_gap": [40.0],
+        "location": "Test",
+    })
+    reference = pd.DataFrame({"time": [t0 + pd.Timedelta(seconds=5)], "latitude": [-2.1], "longitude": [120.1]})
+    clean, _ = clean_catalog(df, reference=reference)
+    assert bool(clean.iloc[0]["reference_match"]) and not clean.iloc[0]["suspect_event"]
+    assert clean.iloc[0]["is_mainshock"]

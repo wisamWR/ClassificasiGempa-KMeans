@@ -1,0 +1,614 @@
+{
+  "created_at": "2026-11-16T05:27:33+00:00",
+  "scikit_learn": "1.9.1",
+  "n_zoning_events": 25773,
+  "selection": "gempa utama, Mw >= Mc tahunan, bukan event semu",
+  "depth_layers": [
+    {
+      "code": "DK",
+      "name": "dangkal",
+      "max_depth_km": 70
+    },
+    {
+      "code": "MN",
+      "name": "menengah",
+      "max_depth_km": 300
+    },
+    {
+      "code": "DL",
+      "name": "dalam",
+      "max_depth_km": null
+    }
+  ],
+  "params": {
+    "min_zone_events": 200,
+    "k_max": 40,
+    "n_init": 10,
+    "scan_n_init": 4,
+    "random_state": 42,
+    "min_b_events": 50,
+    "mc_floor": 3.6,
+    "hdbscan": {
+      "min_cluster_size": 100,
+      "min_samples": 10
+    },
+    "hazard_magnitudes": [
+      5.0,
+      6.0
+    ],
+    "hazard_years": [
+      10,
+      50
+    ]
+  },
+  "k_per_layer": {
+    "DK": 22,
+    "MN": 14,
+    "DL": 1
+  },
+  "k_scan": [
+    {
+      "k": 2,
+      "min_size": 6258,
+      "silhouette": 0.579176937959932,
+      "davies_bouldin": 0.6090359589595677,
+      "layer": "DK"
+    },
+    {
+      "k": 3,
+      "min_size": 4796,
+      "silhouette": 0.4763701082104666,
+      "davies_bouldin": 0.7547361265632712,
+      "layer": "DK"
+    },
+    {
+      "k": 4,
+      "min_size": 2931,
+      "silhouette": 0.48925645454870226,
+      "davies_bouldin": 0.6625560348807598,
+      "layer": "DK"
+    },
+    {
+      "k": 5,
+      "min_size": 2559,
+      "silhouette": 0.5048286805288557,
+      "davies_bouldin": 0.6159803022044267,
+      "layer": "DK"
+    },
+    {
+      "k": 6,
+      "min_size": 2393,
+      "silhouette": 0.47940942537164344,
+      "davies_bouldin": 0.7033041965845029,
+      "layer": "DK"
+    },
+    {
+      "k": 7,
+      "min_size": 2060,
+      "silhouette": 0.4748011083305125,
+      "davies_bouldin": 0.6828947447690071,
+      "layer": "DK"
+    },
+    {
+      "k": 8,
+      "min_size": 2050,
+      "silhouette": 0.4913913599730344,
+      "davies_bouldin": 0.6431573288001486,
+      "layer": "DK"
+    },
+    {
+      "k": 9,
+      "min_size": 1097,
+      "silhouette": 0.48959635963247666,
+      "davies_bouldin": 0.643835731791949,
+      "layer": "DK"
+    },
+    {
+      "k": 10,
+      "min_size": 1056,
+      "silhouette": 0.48329466804128185,
+      "davies_bouldin": 0.6496847869249596,
+      "layer": "DK"
+    },
+    {
+      "k": 11,
+      "min_size": 1050,
+      "silhouette": 0.4838364742887119,
+      "davies_bouldin": 0.6609877182638103,
+      "layer": "DK"
+    },
+    {
+      "k": 12,
+      "min_size": 1049,
+      "silhouette": 0.45469424688159227,
+      "davies_bouldin": 0.7042621873226298,
+      "layer": "DK"
+    },
+    {
+      "k": 13,
+      "min_size": 1042,
+      "silhouette": 0.4464289441936733,
+      "davies_bouldin": 0.7088578404053898,
+      "layer": "DK"
+    },
+    {
+      "k": 14,
+      "min_size": 973,
+      "silhouette": 0.44731463986163456,
+      "davies_bouldin": 0.7339277079226936,
+      "layer": "DK"
+    },
+    {
+      "k": 15,
+      "min_size": 564,
+      "silhouette": 0.45121310975767565,
+      "davies_bouldin": 0.7418248276095415,
+      "layer": "DK"
+    },
+    {
+      "k": 16,
+      "min_size": 541,
+      "silhouette": 0.4463091608930101,
+      "davies_bouldin": 0.7433787523130431,
+      "layer": "DK"
+    },
+    {
+      "k": 17,
+      "min_size": 622,
+      "silhouette": 0.4293641280756734,
+      "davies_bouldin": 0.7685663933279756,
+      "layer": "DK"
+    },
+    {
+      "k": 18,
+      "min_size": 575,
+      "silhouette": 0.42747332925159937,
+      "davies_bouldin": 0.7734471911055191,
+      "layer": "DK"
+    },
+    {
+      "k": 19,
+      "min_size": 515,
+      "silhouette": 0.4262495824094282,
+      "davies_bouldin": 0.790356140104486,
+      "layer": "DK"
+    },
+    {
+      "k": 20,
+      "min_size": 150,
+      "silhouette": 0.4321276554322938,
+      "davies_bouldin": 0.7737046714481831,
+      "layer": "DK"
+    },
+    {
+      "k": 21,
+      "min_size": 412,
+      "silhouette": 0.41722577999918087,
+      "davies_bouldin": 0.7797664647596121,
+      "layer": "DK"
+    },
+    {
+      "k": 22,
+      "min_size": 444,
+      "silhouette": 0.41107032182790626,
+      "davies_bouldin": 0.8073131318496217,
+      "layer": "DK"
+    },
+    {
+      "k": 23,
+      "min_size": 75,
+      "silhouette": 0.41300259795324074,
+      "davies_bouldin": 0.76736792564504,
+      "layer": "DK"
+    },
+    {
+      "k": 24,
+      "min_size": 76,
+      "silhouette": 0.417875694314455,
+      "davies_bouldin": 0.7598659409221894,
+      "layer": "DK"
+    },
+    {
+      "k": 25,
+      "min_size": 76,
+      "silhouette": 0.4123333039299261,
+      "davies_bouldin": 0.7697064808032956,
+      "layer": "DK"
+    },
+    {
+      "k": 26,
+      "min_size": 75,
+      "silhouette": 0.40083987910451513,
+      "davies_bouldin": 0.79689472295839,
+      "layer": "DK"
+    },
+    {
+      "k": 27,
+      "min_size": 76,
+      "silhouette": 0.40943343592067816,
+      "davies_bouldin": 0.7759943524283943,
+      "layer": "DK"
+    },
+    {
+      "k": 28,
+      "min_size": 83,
+      "silhouette": 0.41331847566080004,
+      "davies_bouldin": 0.7773080929634639,
+      "layer": "DK"
+    },
+    {
+      "k": 29,
+      "min_size": 72,
+      "silhouette": 0.40097769533873395,
+      "davies_bouldin": 0.8049977103314285,
+      "layer": "DK"
+    },
+    {
+      "k": 30,
+      "min_size": 72,
+      "silhouette": 0.407088786375321,
+      "davies_bouldin": 0.7877711689124868,
+      "layer": "DK"
+    },
+    {
+      "k": 31,
+      "min_size": 73,
+      "silhouette": 0.39777211218348263,
+      "davies_bouldin": 0.806740521429029,
+      "layer": "DK"
+    },
+    {
+      "k": 32,
+      "min_size": 73,
+      "silhouette": 0.39024878113453715,
+      "davies_bouldin": 0.8191218250765451,
+      "layer": "DK"
+    },
+    {
+      "k": 33,
+      "min_size": 73,
+      "silhouette": 0.38251839073270133,
+      "davies_bouldin": 0.8387917101222673,
+      "layer": "DK"
+    },
+    {
+      "k": 34,
+      "min_size": 73,
+      "silhouette": 0.38850773059912436,
+      "davies_bouldin": 0.8457194116883774,
+      "layer": "DK"
+    },
+    {
+      "k": 35,
+      "min_size": 65,
+      "silhouette": 0.39342105785656306,
+      "davies_bouldin": 0.817388484493138,
+      "layer": "DK"
+    },
+    {
+      "k": 36,
+      "min_size": 66,
+      "silhouette": 0.3860361091526774,
+      "davies_bouldin": 0.8404568727491076,
+      "layer": "DK"
+    },
+    {
+      "k": 37,
+      "min_size": 68,
+      "silhouette": 0.391515795951559,
+      "davies_bouldin": 0.8182488037513628,
+      "layer": "DK"
+    },
+    {
+      "k": 38,
+      "min_size": 44,
+      "silhouette": 0.3859802291366352,
+      "davies_bouldin": 0.8370455384517899,
+      "layer": "DK"
+    },
+    {
+      "k": 39,
+      "min_size": 36,
+      "silhouette": 0.3800396300112122,
+      "davies_bouldin": 0.8363924203685539,
+      "layer": "DK"
+    },
+    {
+      "k": 40,
+      "min_size": 43,
+      "silhouette": 0.3790038033436492,
+      "davies_bouldin": 0.847097497785952,
+      "layer": "DK"
+    },
+    {
+      "k": 2,
+      "min_size": 1401,
+      "silhouette": 0.5998852130584453,
+      "davies_bouldin": 0.5784010283437165,
+      "layer": "MN"
+    },
+    {
+      "k": 3,
+      "min_size": 1154,
+      "silhouette": 0.5010764319024227,
+      "davies_bouldin": 0.6668694294976228,
+      "layer": "MN"
+    },
+    {
+      "k": 4,
+      "min_size": 1153,
+      "silhouette": 0.5894304771787521,
+      "davies_bouldin": 0.5574165640762916,
+      "layer": "MN"
+    },
+    {
+      "k": 5,
+      "min_size": 621,
+      "silhouette": 0.5770958526299015,
+      "davies_bouldin": 0.5811458179133993,
+      "layer": "MN"
+    },
+    {
+      "k": 6,
+      "min_size": 312,
+      "silhouette": 0.5887699908179367,
+      "davies_bouldin": 0.5213230728304178,
+      "layer": "MN"
+    },
+    {
+      "k": 7,
+      "min_size": 312,
+      "silhouette": 0.567581328299804,
+      "davies_bouldin": 0.5546080456868678,
+      "layer": "MN"
+    },
+    {
+      "k": 8,
+      "min_size": 311,
+      "silhouette": 0.5416441780544795,
+      "davies_bouldin": 0.5947286716185021,
+      "layer": "MN"
+    },
+    {
+      "k": 9,
+      "min_size": 310,
+      "silhouette": 0.5380670846495157,
+      "davies_bouldin": 0.5900444487987682,
+      "layer": "MN"
+    },
+    {
+      "k": 10,
+      "min_size": 310,
+      "silhouette": 0.5373875496927729,
+      "davies_bouldin": 0.583673126831808,
+      "layer": "MN"
+    },
+    {
+      "k": 11,
+      "min_size": 307,
+      "silhouette": 0.5268161903456524,
+      "davies_bouldin": 0.6135072439733549,
+      "layer": "MN"
+    },
+    {
+      "k": 12,
+      "min_size": 280,
+      "silhouette": 0.4769471250496459,
+      "davies_bouldin": 0.7015208656675878,
+      "layer": "MN"
+    },
+    {
+      "k": 13,
+      "min_size": 121,
+      "silhouette": 0.4692676714815995,
+      "davies_bouldin": 0.7280852088688762,
+      "layer": "MN"
+    },
+    {
+      "k": 14,
+      "min_size": 249,
+      "silhouette": 0.47465409364614597,
+      "davies_bouldin": 0.712308836093869,
+      "layer": "MN"
+    },
+    {
+      "k": 15,
+      "min_size": 21,
+      "silhouette": 0.4814422790731095,
+      "davies_bouldin": 0.693451136503344,
+      "layer": "MN"
+    },
+    {
+      "k": 16,
+      "min_size": 121,
+      "silhouette": 0.4664099014180762,
+      "davies_bouldin": 0.7222398362986656,
+      "layer": "MN"
+    },
+    {
+      "k": 17,
+      "min_size": 121,
+      "silhouette": 0.44741066952534136,
+      "davies_bouldin": 0.7474627486027561,
+      "layer": "MN"
+    },
+    {
+      "k": 18,
+      "min_size": 89,
+      "silhouette": 0.44019363455461974,
+      "davies_bouldin": 0.7619570007606675,
+      "layer": "MN"
+    },
+    {
+      "k": 19,
+      "min_size": 89,
+      "silhouette": 0.4358899595683802,
+      "davies_bouldin": 0.7724129355565171,
+      "layer": "MN"
+    },
+    {
+      "k": 20,
+      "min_size": 19,
+      "silhouette": 0.4354976130924589,
+      "davies_bouldin": 0.7819336833852232,
+      "layer": "MN"
+    },
+    {
+      "k": 21,
+      "min_size": 13,
+      "silhouette": 0.4466350155631282,
+      "davies_bouldin": 0.7523457503214394,
+      "layer": "MN"
+    },
+    {
+      "k": 22,
+      "min_size": 22,
+      "silhouette": 0.41172899194010126,
+      "davies_bouldin": 0.81636126808298,
+      "layer": "MN"
+    },
+    {
+      "k": 23,
+      "min_size": 14,
+      "silhouette": 0.4138120536639883,
+      "davies_bouldin": 0.8035492253748547,
+      "layer": "MN"
+    },
+    {
+      "k": 24,
+      "min_size": 14,
+      "silhouette": 0.4010194417417549,
+      "davies_bouldin": 0.8365208302250223,
+      "layer": "MN"
+    },
+    {
+      "k": 25,
+      "min_size": 14,
+      "silhouette": 0.38663270344477074,
+      "davies_bouldin": 0.8632095692697134,
+      "layer": "MN"
+    },
+    {
+      "k": 26,
+      "min_size": 13,
+      "silhouette": 0.40878808208215195,
+      "davies_bouldin": 0.816366492832826,
+      "layer": "MN"
+    },
+    {
+      "k": 27,
+      "min_size": 13,
+      "silhouette": 0.40899460673931803,
+      "davies_bouldin": 0.8158556853650129,
+      "layer": "MN"
+    },
+    {
+      "k": 28,
+      "min_size": 13,
+      "silhouette": 0.38917033719690125,
+      "davies_bouldin": 0.8516352301714916,
+      "layer": "MN"
+    },
+    {
+      "k": 29,
+      "min_size": 19,
+      "silhouette": 0.37370232038235784,
+      "davies_bouldin": 0.8766383005960137,
+      "layer": "MN"
+    },
+    {
+      "k": 30,
+      "min_size": 10,
+      "silhouette": 0.38802337669083603,
+      "davies_bouldin": 0.8518862310059304,
+      "layer": "MN"
+    },
+    {
+      "k": 31,
+      "min_size": 19,
+      "silhouette": 0.36999643184173514,
+      "davies_bouldin": 0.9189887910369614,
+      "layer": "MN"
+    },
+    {
+      "k": 2,
+      "min_size": 177,
+      "silhouette": 0.5627474456338384,
+      "davies_bouldin": 0.7143340641577709,
+      "layer": "DL"
+    },
+    {
+      "k": 3,
+      "min_size": 173,
+      "silhouette": 0.5980255028829594,
+      "davies_bouldin": 0.5504743579765732,
+      "layer": "DL"
+    },
+    {
+      "k": 4,
+      "min_size": 126,
+      "silhouette": 0.5821148971312863,
+      "davies_bouldin": 0.6268997698425609,
+      "layer": "DL"
+    },
+    {
+      "k": 5,
+      "min_size": 56,
+      "silhouette": 0.5616330612386942,
+      "davies_bouldin": 0.6970606403779622,
+      "layer": "DL"
+    },
+    {
+      "k": 6,
+      "min_size": 56,
+      "silhouette": 0.48854417471363965,
+      "davies_bouldin": 0.7840714036820279,
+      "layer": "DL"
+    },
+    {
+      "k": 7,
+      "min_size": 35,
+      "silhouette": 0.4885880328936659,
+      "davies_bouldin": 0.8094908225297022,
+      "layer": "DL"
+    }
+  ],
+  "comparison": [
+    {
+      "layer": "DK",
+      "n_events": 17968,
+      "kmeans_k": 22,
+      "kmeans_silhouette": 0.42930538082710173,
+      "kmeans_davies_bouldin": 0.7526787473691935,
+      "hdbscan_clusters": 15,
+      "hdbscan_noise": 0.21855520926090832,
+      "hdbscan_silhouette": 0.2066232221838649,
+      "hdbscan_davies_bouldin": 0.7351967903155919,
+      "ari_on_hdbscan_core": 0.16001575699556791
+    },
+    {
+      "layer": "MN",
+      "n_events": 6336,
+      "kmeans_k": 14,
+      "kmeans_silhouette": 0.47465409364614597,
+      "kmeans_davies_bouldin": 0.712308836093869,
+      "hdbscan_clusters": 7,
+      "hdbscan_noise": 0.11868686868686873,
+      "hdbscan_silhouette": 0.6032422194678918,
+      "hdbscan_davies_bouldin": 0.43714914991501425,
+      "ari_on_hdbscan_core": 0.44942998395868694
+    },
+    {
+      "layer": "DL",
+      "n_events": 1469,
+      "kmeans_k": 1,
+      "kmeans_silhouette": NaN,
+      "kmeans_davies_bouldin": NaN,
+      "hdbscan_clusters": 2,
+      "hdbscan_noise": 0.12389380530973448,
+      "hdbscan_silhouette": 0.573820141076592,
+      "hdbscan_davies_bouldin": 0.6310364468715283,
+      "ari_on_hdbscan_core": 0.0
+    }
+  ]
+}

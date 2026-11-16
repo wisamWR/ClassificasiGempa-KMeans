@@ -15,6 +15,7 @@ from gempa.data import load_catalog
 from gempa.decluster import gardner_knopoff
 from gempa.intensity import epicentral_intensity, mmi_class
 from gempa.magnitude import CONVERSIONS, to_mw
+from gempa.reference import MATCH_KM, MATCH_SECONDS, has_reference_match, load_reference
 
 # Kedalaman default BMKG bila kedalaman tidak bisa ditentukan
 FIXED_DEPTHS_KM = (0, 10)
@@ -26,6 +27,10 @@ MIN_PHASECOUNT = 5
 # Fase saja tidak cukup: median fase seluruh event M>=5 tahun 2019-2021 hanya ~10.
 SUSPECT_MIN_MW = 5.0
 SUSPECT_MAX_PHASECOUNT = 10
+# Event Mw >= 5 harus punya pasangan di katalog USGS ComCat (lengkap untuk M >= 5 di Indonesia).
+# Tahun normal: 95-99% cocok; 2019-2021 hanya 16-50% (kontaminasi event semu, mis. bayangan
+# gempa teleseismik di Kalimantan/Laut Jawa).
+VERIFY_MIN_MW = 5.0
 # Window mundur declustering (0 = aftershock saja, seperti Gardner & Knopoff asli).
 # Window simetris membuat Cianjur 2022 (Mw 5.6) terbaca sebagai foreshock event Mw 5.97.
 FORESHOCK_RATIO = 0.0
@@ -34,8 +39,13 @@ LAT_RANGE = (-12.0, 7.0)
 LON_RANGE = (94.0, 142.0)
 
 
-def clean_catalog(df):
-    """Tambahkan kolom kualitas, Mw, Mc, declustering, dan intensitas. Mengembalikan (df, report)."""
+def clean_catalog(df, reference=None):
+    """Tambahkan kolom kualitas, Mw, Mc, declustering, dan intensitas. Mengembalikan (df, report).
+
+    reference: katalog pembanding (lihat gempa.reference); default dibaca dari data/raw bila ada.
+    """
+    if reference is None and paths.USGS_REFERENCE.exists():
+        reference = load_reference()
     df = df.copy()
     n_raw = len(df)
 
@@ -59,11 +69,20 @@ def clean_catalog(df):
     df["mc"] = df["time"].dt.year.map(mc_of_year)
     df["above_mc"] = df["mw"] >= df["mc"] - 1e-9
 
-    df["suspect_event"] = (
+    few_phases = (
         (df["mw"] >= SUSPECT_MIN_MW)
         & (df["phasecount"] < SUSPECT_MAX_PHASECOUNT)
         & (df["azimuth_gap"] > MAX_AZIMUTH_GAP)
     )
+    # Verifikasi silang gempa besar dengan katalog independen
+    checked = df["mw"] >= VERIFY_MIN_MW
+    df["reference_match"] = pd.Series(pd.NA, index=df.index, dtype="boolean")
+    if reference is not None:
+        big = df[checked]
+        df.loc[checked, "reference_match"] = has_reference_match(big["time"], big["latitude"],
+                                                                 big["longitude"], reference)
+    unconfirmed = checked & (df["reference_match"] == False).fillna(False)  # noqa: E712
+    df["suspect_event"] = few_phases | unconfirmed
 
     # Declustering Gardner-Knopoff tanpa event semu (window besarnya bisa menyerap sekuens lain)
     real = df[~df["suspect_event"]]
@@ -96,6 +115,18 @@ def clean_catalog(df):
         "depth_fixed": int(df["depth_fixed"].sum()),
         "low_quality_location": int(df["low_quality_location"].sum()),
         "suspect_event": int(df["suspect_event"].sum()),
+        "verification": {
+            "reference": paths.USGS_REFERENCE.name if reference is not None else None,
+            "min_mw": VERIFY_MIN_MW,
+            "tolerance": {"seconds": MATCH_SECONDS, "km": MATCH_KM},
+            "checked": int(checked.sum()),
+            "unconfirmed": int(unconfirmed.sum()),
+            "few_phases_rule": int(few_phases.sum()),
+            "match_rate_by_year": (
+                df[checked].groupby(df["time"].dt.year)["reference_match"].mean().round(3).to_dict()
+                if reference is not None else {}
+            ),
+        },
         "magnitude": {
             "relations": {t: {"slope": s, "intercept": i, "valid_range": list(r), "source": src}
                           for t, (s, i, r, src) in CONVERSIONS.items()},

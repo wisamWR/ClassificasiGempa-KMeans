@@ -8,7 +8,38 @@
   },
   "depth_fixed": 45711,
   "low_quality_location": 42793,
-  "suspect_event": 254,
+  "suspect_event": 1530,
+  "verification": {
+    "reference": "usgs_comcat_m4.0_2008_2025.csv",
+    "min_mw": 5.0,
+    "tolerance": {
+      "seconds": 60,
+      "km": 150
+    },
+    "checked": 3633,
+    "unconfirmed": 1489,
+    "few_phases_rule": 254,
+    "match_rate_by_year": {
+      "2008": 0.596,
+      "2009": 0.819,
+      "2010": 0.948,
+      "2011": 0.962,
+      "2012": 0.956,
+      "2013": 0.695,
+      "2014": 0.991,
+      "2015": 0.978,
+      "2016": 0.984,
+      "2017": 0.971,
+      "2018": 0.787,
+      "2019": 0.498,
+      "2020": 0.157,
+      "2021": 0.211,
+      "2022": 0.994,
+      "2023": 0.994,
+      "2024": 0.982,
+      "2025": 0.979
+    }
+  },
   "magnitude": {
     "relations": {
       "M": {
@@ -155,17 +186,17 @@
   "declustering": {
     "method": "Gardner & Knopoff (1974), window aftershock (window HMTK)",
     "foreshock_ratio": 0.0,
-    "mainshocks_symmetric_window": 32506,
-    "mainshocks": 49632,
-    "dependent": 81245,
-    "excluded_suspect": 254,
+    "mainshocks_symmetric_window": 33743,
+    "mainshocks": 50436,
+    "dependent": 79165,
+    "excluded_suspect": 1530,
     "largest_sequences": [
       {
         "eventID": "bmg2019svqk",
         "time": "2019-09-25T23:46:44.673309+00:00",
         "mw": 6.46,
         "location": "Seram, Indonesia",
-        "n_events": 1072
+        "n_events": 1069
       },
       {
         "eventID": "bmg2017klni",
@@ -179,14 +210,14 @@
         "time": "2019-11-14T16:17:42.991642+00:00",
         "mw": 7.15,
         "location": "Northern Molucca Sea",
-        "n_events": 858
+        "n_events": 857
       },
       {
         "eventID": "bmg2019hdky",
         "time": "2019-04-12T11:40:50.439722+00:00",
         "mw": 6.78,
         "location": "Sulawesi, Indonesia",
-        "n_events": 739
+        "n_events": 738
       },
       {
         "eventID": "bmg2021ykge",
@@ -228,7 +259,7 @@
         "time": "2019-07-07T15:08:42.016671+00:00",
         "mw": 6.97,
         "location": "Northern Molucca Sea",
-        "n_events": 472
+        "n_events": 470
       }
     ]
   },
