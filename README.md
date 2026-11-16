@@ -139,6 +139,17 @@ jupyter notebook notebooks/seismic_zoning.ipynb
 
 Versi scikit-learn saat training dicatat di `models/metadata.json` dan harus sama dengan versi di `requirements.txt`.
 
+### Deploy ke Streamlit Community Cloud
+
+Semua data dan model yang dibaca aplikasi sudah ada di repo (±43 MB), jadi tidak perlu langkah build.
+
+1. Masuk ke [share.streamlit.io](https://share.streamlit.io) dengan akun GitHub, lalu **Create app → Deploy a public app from GitHub**.
+2. Repository `wisamWR/ClassificasiGempa-KMeans`, branch `dev-wsm` (atau `main`), main file `app/streamlit_app.py`.
+3. **Advanced settings → Python version: 3.11** (sama dengan versi saat model dilatih).
+4. Deploy. Dependency dibaca dari `requirements.txt`; konfigurasi tampilan dari `.streamlit/config.toml`.
+
+Halaman Cek Lokasi (pencarian nama kota) dan Gempa Terkini butuh akses internet dari server ke Nominatim dan BMKG.
+
 ### Menjalankan Test
 
 ```bash
@@ -199,7 +210,9 @@ models/
 docs/
   PENJELASAN_PERUBAHAN.md          📝 Catatan perubahan metodologi
   informasi_keselamatan_streamlit.txt  🛡️ Rancangan fitur informasi keselamatan
-pyproject.toml                     📦 Konfigurasi paket gempa & pytest
+pyproject.toml                     📦 Konfigurasi paket gempa, pytest & ruff
+.streamlit/config.toml             ⚙️ Konfigurasi Streamlit untuk deploy
+.github/workflows/ci.yml           ✅ CI: ruff + pytest di setiap push/PR
 requirements.txt                   📋 Dependency aplikasi
 requirements-dev.txt               🧪 Dependency notebook, training, dan test
 ```
