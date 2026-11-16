@@ -187,7 +187,8 @@ selected_profiles = st.sidebar.multiselect("Profil Klaster (K-Means)", RISK_ORDE
 mainshock_only = st.sidebar.checkbox("Hanya gempa utama (tanpa gempa susulan)", value=False, key='filter_mainshock',
                                      help="Hasil declustering Gardner–Knopoff (1974).")
 hide_suspect = st.sidebar.checkbox("Sembunyikan event semu", value=True, key='filter_hide_suspect',
-                                   help="Mw ≥ 5 dengan < 10 fase dan celah azimut > 180°.")
+                                   help="Mw ≥ 5 yang tidak tercatat di katalog USGS (±60 s, ≤150 km), "
+                                        "atau dengan < 10 fase dan celah azimut > 180°.")
 
 if min_date > max_date:
     st.sidebar.warning("Tanggal Awal setelah Tanggal Akhir, rentang ditukar otomatis.")
