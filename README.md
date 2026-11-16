@@ -36,6 +36,7 @@ Aplikasi multipage (`st.navigation`). Waktu gempa ditampilkan dalam **WIB/WITA/W
 | 🗺️ **Peta Gempa** | Seluruh gempa (marker cluster, warna = kelas MMI) dengan filter tanggal, Mw, lapisan kedalaman, kelas MMI, profil klaster, gempa utama, dan event semu. Maksimal 2.000 titik dengan sampel seimbang per kelas intensitas. |
 | ⚡ **Kategorikan Gempa** | Masukkan lintang, bujur, kedalaman, dan magnitudo (Mw, M, MLv, ML, atau mb yang dikonversi ke Mw) → kelas intensitas MMI + saran, zona sumber, seberapa sering gempa sebesar itu terjadi di zona tersebut, dan profil klaster K-Means. |
 | 🔁 **Gempa Susulan** | 20 deret gempa terbesar hasil declustering: peta **animasi** kemunculan gempa susulan per hari, grafik peluruhan dengan fit **Omori–Utsu** (maximum likelihood, Ogata 1983), dan magnitudo susulan terhadap waktu. Deret yang tidak meluruh seperti gempa susulan biasa (mis. swarm) ditandai. |
+| 🐝 **Klaster & Swarm** | Klaster spatio-temporal **ST-DBSCAN** (20 km, 2 hari, ≥ 10 gempa) yang digolongkan menjadi swarm/doublet, deret gempa utama–susulan, atau potongan deret lain; peta, tabel, dan magnitudo terhadap waktu per klaster. |
 | 📊 **Eksplorasi Data** | Distribusi magnitudo, grafik Gutenberg–Richter, deret waktu bulanan, Mc dan tingkat verifikasi USGS per tahun, penampang kedalaman (Jawa, Sumatra, Laut Maluku, Laut Banda), tampilan **3D** (pydeck) yang memperlihatkan lempeng menunjam, dan peta **jenis sesar** dari 3.864 mekanisme fokal (klasifikasi Frohlich 1992). |
 | 📘 **Metodologi** | Pipeline, metrik model, perbandingan K-Means vs HDBSCAN, keterbatasan, dan referensi. |
 | 🛡️ **Panduan Keselamatan** | Panduan sebelum, saat, dan sesudah gempa, serta legenda kelas intensitas MMI. |
@@ -129,6 +130,7 @@ python -m gempa.clean      # katalog bersih + laporan (data/processed/catalog_*.
 python -m gempa.train      # sudah menjalankan pembersihan yang sama sebelum training
 python -m gempa.zoning     # zonasi seismik + statistik hazard (memakai katalog bersih)
 python -m gempa.focal      # jenis sesar dari mekanisme fokal
+python -m gempa.swarm      # klaster ST-DBSCAN & swarm (memakai data hasil gempa.train)
 
 # Opsi 2: notebook (jalankan dari folder notebooks/, Restart & Run All)
 jupyter notebook notebooks/earthquake_clustering.ipynb
@@ -167,6 +169,7 @@ src/gempa/
   location.py                      📍 Zona di suatu titik & peluang gempa dalam radius
   bmkg.py                          🔴 Ambil & parse feed gempa publik BMKG
   focal.py                         🪨 Jenis sesar dari mekanisme fokal (CLI)
+  swarm.py                         🐝 Klaster spatio-temporal ST-DBSCAN & deteksi swarm (CLI)
   timezones.py                     🕒 Perkiraan zona waktu WIB/WITA/WIT dari koordinat
   train.py                         🤖 Pencarian k, training, pelabelan, simpan artifact (CLI)
   paths.py                         📁 Lokasi file data & model
@@ -184,6 +187,7 @@ data/
   processed/catalog_clean.parquet  🧹 Katalog bersih lengkap (tidak di-commit, buat dengan gempa.clean)
   processed/zone_events.parquet    🧭 Zona tiap event (eventID → zone_id)
   processed/focal_mechanisms.parquet  🪨 Bidang nodal, plunge P/T/B, dan jenis sesar (gempa.focal)
+  processed/st_clusters.parquet    🐝 Ringkasan klaster ST-DBSCAN (+ st_cluster_events.parquet)
 models/
   kmeans_pipeline.joblib           🤖 Pipeline MinMaxScaler + K-Means terlatih
   cluster_info.csv                 📊 Rata-rata fitur, severity score, dan label tiap klaster
