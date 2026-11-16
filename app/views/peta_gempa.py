@@ -106,7 +106,8 @@ points = [
 FastMarkerCluster(points, callback=MARKER_CALLBACK).add_to(m)
 st_folium(m, height=520, use_container_width=True, returned_objects=[], key="peta_map")
 if len(plot_df) < len(filtered):
-    st.caption(f"Peta menampilkan {len(plot_df):,} dari {len(filtered):,} gempa (sampel seimbang per kelas intensitas).")
+    st.caption(f"Peta menampilkan {len(plot_df):,} dari {len(filtered):,} gempa "
+               "(sampel seimbang per kelas intensitas).")
 
 st.subheader("📋 Kelas Intensitas (MMI) & Rekomendasi")
 mmi_legend()

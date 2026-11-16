@@ -58,7 +58,8 @@ with right:
     st.markdown(f"#### 🧭 Zona {zone_id} · {z['name']}")
     st.markdown(
         f"- Lapisan **{LAYER_LABELS[z['layer']]}**, episentrum {position}.\n"
-        f"- Gempa utama **M ≥ {mw:.1f}** di zona ini rata-rata terjadi sekali tiap **{fmt_years(context['recurrence_years'])}**.\n"
+        f"- Gempa utama **M ≥ {mw:.1f}** di zona ini rata-rata terjadi sekali tiap "
+        f"**{fmt_years(context['recurrence_years'])}**.\n"
         f"- Lebih besar dari **{smaller:.0%}** gempa utama yang tercatat di zona ini "
         f"(terbesar: Mw {z['mw_max']:.1f}).\n"
         f"- b-value zona {z['b']:.2f} ± {z['b_sigma']:.2f}."

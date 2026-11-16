@@ -17,7 +17,8 @@ TIPS_SAAT_GEMPA = [
     "🚪 Jauhi jendela, cermin, lemari, dan benda berat yang bisa jatuh.",
     "🏃 Jika di luar ruangan, jauhi gedung, tiang listrik, dan pohon besar.",
     "🚗 Jika sedang berkendara, hentikan kendaraan di tempat terbuka.",
-    "🌊 Jika di pantai dan guncangan kuat atau lama, segera menjauh ke tempat tinggi tanpa menunggu peringatan tsunami.",
+    "🌊 Jika di pantai dan guncangan kuat atau lama, segera menjauh ke tempat tinggi tanpa menunggu "
+    "peringatan tsunami.",
 ]
 
 TIPS_SETELAH_GEMPA = [

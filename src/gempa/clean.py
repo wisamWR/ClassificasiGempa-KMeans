@@ -168,10 +168,12 @@ def main(argv=None):
     args.output.parent.mkdir(parents=True, exist_ok=True)
     df.drop(columns=[c for c in df.columns if df[c].isna().all()]).to_parquet(args.output, index=False)
     with open(args.report, "w", encoding="utf-8") as f:
-        json.dump(report, f, indent=2, ensure_ascii=False, default=lambda o: o.item() if isinstance(o, np.generic) else str(o))
+        json.dump(report, f, indent=2, ensure_ascii=False,
+                  default=lambda o: o.item() if isinstance(o, np.generic) else str(o))
 
     print(f"{report['n_raw']:,} event mentah -> {report['n_clean']:,} event bersih")
-    print(f"Mc keseluruhan: {report['completeness']['mc_overall']}, event >= Mc: {report['completeness']['above_mc']:,}")
+    completeness = report["completeness"]
+    print(f"Mc keseluruhan: {completeness['mc_overall']}, event >= Mc: {completeness['above_mc']:,}")
     print(f"Mainshock: {report['declustering']['mainshocks']:,}, dependent: {report['declustering']['dependent']:,}")
     print("Kelas MMI:", report["mmi_class_counts"])
     print(f"Tersimpan: {args.output} dan {args.report}")
