@@ -3,6 +3,9 @@
 ![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
 ![Scikit-Learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+[![CI](https://github.com/wisamWR/ClassificasiGempa-KMeans/actions/workflows/ci.yml/badge.svg?branch=dev-wsm)](https://github.com/wisamWR/ClassificasiGempa-KMeans/actions/workflows/ci.yml)
+
+### 🚀 [Buka aplikasi: Zona Gempa Indonesia](https://classificasigempa-kmeansgit-rcdqnzzovc9qubgl7ravzn.streamlit.app/)
 
 Aplikasi analisis kegempaan Indonesia berbasis katalog BMKG 2008–2025 dan **Machine Learning (K-Means Clustering)**. K-Means dipakai untuk membagi wilayah menjadi **zona sumber gempa**, lalu tiap zona diberi statistik Gutenberg–Richter: b-value, periode ulang, dan peluang gempa M ≥ 5 / M ≥ 6. Pengguna bisa mengecek kotanya, menjelajah zona, dan membaca konteks sebuah gempa.
 
@@ -12,28 +15,16 @@ Aplikasi analisis kegempaan Indonesia berbasis katalog BMKG 2008–2025 dan **Ma
 
 ---
 
-## 👥 Anggota Kelompok 2
-
-| No  | Nama                      | NIM            |
-| :-- | :------------------------ | :------------- |
-| 1.  | **Adam Haritsa Thahara**  | A11.2024.15556 |
-| 2.  | **Angela Echa Naresti**   | A11.2024.15791 |
-| 3.  | **Farros Rifantiarno R.** | A11.2024.15694 |
-| 4.  | **Nadjwa Salsabila W.**   | A11.2024.15670 |
-| 5.  | **Mohammad Wisam W.**     | A11.2024.15739 |
-
----
-
 ## 🌟 Halaman Aplikasi
 
-Aplikasi multipage (`st.navigation`). Waktu gempa ditampilkan dalam **WIB/WITA/WIT** (perkiraan dari koordinat).
+Aplikasi multipage (`st.navigation`) yang bisa langsung dibuka di **[Streamlit Community Cloud](https://classificasigempa-kmeansgit-rcdqnzzovc9qubgl7ravzn.streamlit.app/)**. Waktu gempa ditampilkan dalam **WIB/WITA/WIT** (perkiraan dari koordinat), dan sidebar setiap halaman memuat disclaimer serta tautan ke BMKG dan InaRISK.
 
 | Halaman | Isi |
 | :-- | :-- |
-| 📍 **Cek Lokasi** (halaman awal) | Cari kota atau klik peta → zona sumber gempa di bawah lokasi (dangkal/menengah/dalam), peluang gempa utama M ≥ 5 dan M ≥ 6 dalam 10/50 tahun di radius pilihan (25–300 km), riwayat & 5 gempa terbesar, intensitas tertinggi yang pernah tercatat, dan linimasa gempa. |
+| 📍 **Cek Lokasi** (halaman awal) | Cari kota atau klik peta → zona sumber gempa di bawah lokasi untuk tiap lapisan (di dalam zona atau jaraknya ke tepi zona), peluang gempa utama M ≥ 5 dan M ≥ 6 dalam 10/50 tahun di radius pilihan (25–300 km) beserta peluang dari gempa dangkal saja, jumlah gempa tercatat vs perkiraan model, riwayat & 5 gempa terbesar, intensitas tertinggi yang pernah tercatat beserta saran, dan linimasa gempa. Lokasi yang jauh dari zona dangkal mana pun (mis. Kalimantan Barat) diberi peringatan. |
 | 🔴 **Gempa Terkini** | Gempa terbaru, 15 gempa M ≥ 5, dan 15 gempa dirasakan dari feed publik **BMKG** (data.bmkg.go.id, disimpan sementara 5 menit), lengkap dengan shakemap, peringatan bila berpotensi tsunami, perkiraan intensitas, zona sumber, dan seberapa sering gempa sebesar itu terjadi di zonanya. |
 | 🧭 **Zona Seismik** | Peta poligon zona per lapisan kedalaman, diwarnai menurut peluang M ≥ 6/M ≥ 5, periode ulang, atau b-value; opsi heatmap. Klik zona untuk detail: statistik, grafik Gutenberg–Richter, gempa terbesar, dan proporsi jenis sesar di zona. |
-| 🗺️ **Peta Gempa** | Seluruh gempa (marker cluster, warna = kelas MMI) dengan filter tanggal, Mw, lapisan kedalaman, kelas MMI, profil klaster, gempa utama, dan event semu. Maksimal 2.000 titik dengan sampel seimbang per kelas intensitas. |
+| 🗺️ **Peta Gempa** | Seluruh gempa (marker cluster, warna = kelas MMI) dengan filter tanggal, Mw, lapisan kedalaman, kelas MMI, profil klaster, gempa utama, dan event semu, plus tombol reset filter. Popup berisi Mw, magnitudo asli, kedalaman, intensitas, zona, profil klaster, status gempa utama, dan waktu setempat. Maksimal 2.000 titik dengan sampel seimbang per kelas intensitas. |
 | ⚡ **Kategorikan Gempa** | Masukkan lintang, bujur, kedalaman, dan magnitudo (Mw, M, MLv, ML, atau mb yang dikonversi ke Mw) → kelas intensitas MMI + saran, zona sumber, seberapa sering gempa sebesar itu terjadi di zona tersebut, dan profil klaster K-Means. |
 | 🔁 **Gempa Susulan** | 20 deret gempa terbesar hasil declustering: peta **animasi** kemunculan gempa susulan per hari, grafik peluruhan dengan fit **Omori–Utsu** (maximum likelihood, Ogata 1983), dan magnitudo susulan terhadap waktu. Deret yang tidak meluruh seperti gempa susulan biasa (mis. swarm) ditandai. |
 | 🐝 **Klaster & Swarm** | Klaster spatio-temporal **ST-DBSCAN** (20 km, 2 hari, ≥ 10 gempa) yang digolongkan menjadi swarm/doublet, deret gempa utama–susulan, atau potongan deret lain; peta, tabel, dan magnitudo terhadap waktu per klaster. |
@@ -52,7 +43,7 @@ Aplikasi multipage (`st.navigation`). Waktu gempa ditampilkan dalam **WIB/WITA/W
 Langkah `python -m gempa.clean` (dokumentasi lengkap di `notebooks/data_cleaning.ipynb`):
 
 - **Homogenisasi magnitudo ke Mw** dengan relasi Taruna & Pratiwi (2021); pada pasangan Mw mekanisme fokal di katalog ini biasnya ≤ 0,02.
-- **Magnitude of completeness (Mc)** per tahun (maximum curvature + 0,2): turun dari ±4,5 (2008) ke ±3,1 (2020–2022).
+- **Magnitude of completeness (Mc)** per tahun (maximum curvature + 0,2): turun dari 4,7 (2008) ke 3,1 (2020–2022).
 - **Declustering Gardner & Knopoff (1974)** untuk memisahkan gempa utama dan gempa susulan.
 - **Flag kualitas:** kedalaman default dan lokasi kurang terikat.
 - **Verifikasi silang dengan USGS ComCat:** gempa Mw ≥ 5 yang tidak punya pasangan di katalog USGS (±60 s, ≤ 150 km), atau yang hanya terekam < 10 fase dengan celah azimut > 180°, ditandai **event semu** (1.530 event). Tingkat kecocokan 95–99% pada tahun normal, tetapi hanya 16–50% pada 2019–2021: katalog BMKG periode itu memuat banyak event fiktif, terutama di Kalimantan/Laut Jawa dan beberapa menit setelah gempa besar di luar wilayah (mis. Selandia Baru, Fiji).
@@ -79,7 +70,34 @@ Langkah `python -m gempa.zoning` (dokumentasi di `notebooks/seismic_zoning.ipynb
 - **Pembanding HDBSCAN:** di lapisan menengah HDBSCAN sepakat sedang dengan K-Means (ARI 0,45); di lapisan dangkal ia menggabungkan busur yang menerus dan menandai 22% event sebagai noise, sehingga kurang cocok untuk zonasi yang harus menutup seluruh wilayah.
 - **Statistik per zona:** Mc, b-value (maximum likelihood Aki 1965, galat Shi & Bolt 1982), laju tahunan, periode ulang, dan probabilitas Poisson M ≥ 5 / M ≥ 6 dalam 10 dan 50 tahun. Laju hanya dihitung dari tahun yang katalognya sudah lengkap pada Mc zona.
 
+- **Hasil:** b-value 0,85–1,42 (median 1,10); periode ulang gempa utama M ≥ 6 dari ±1,5 tahun (Sumatra Selatan, dangkal) sampai ±26 tahun (Flores, menengah).
+- **Validasi:** jumlah gempa utama yang tercatat di 89% zona (M ≥ 5) dan 95% zona (M ≥ 6) berada dalam interval 95% Poisson dari prediksi Gutenberg–Richter.
+
 > ⚠️ Probabilitas bersifat statistik katalog 17 tahun (gempa utama, model Poisson), bukan peta bahaya resmi seperti Peta Sumber dan Bahaya Gempa Indonesia (PuSGeN 2017).
+
+### 🔴 Gempa Terkini (`gempa.bmkg`)
+
+- Feed publik BMKG `autogempa`, `gempaterkini`, dan `gempadirasakan` (data.bmkg.go.id) diambil saat halaman dibuka dan disimpan sementara 5 menit, jauh di bawah batas BMKG 60 permintaan/menit. Ada tombol muat ulang; bila BMKG tidak terjangkau, aplikasi hanya menampilkan peringatan.
+- Magnitudo BMKG dikonversi ke Mw seperti tipe M di katalog, lalu tiap gempa diberi perkiraan intensitas, zona sumber, dan selang waktu rata-rata gempa sebesar itu di zonanya.
+- Sesuai ketentuan BMKG, BMKG dicantumkan sebagai sumber data di aplikasi.
+
+### 🪨 Mekanisme Fokal (`gempa.focal`)
+
+- Bidang nodal (strike/dip/rake) dari 3.905 solusi BMKG diubah menjadi sumbu tekanan (P), tarikan (T), dan netral (B).
+- Jenis sesar menurut Frohlich (1992): plunge T > 50° = sesar naik, plunge P > 60° = sesar turun, plunge B > 60° = sesar geser, selain itu oblik. Kedua bidang nodal memberi jenis yang sama pada semua solusi.
+- Gempa dangkal didominasi sesar naik (35%) dan sesar geser (27%); gempa dalam didominasi sesar turun dan oblik.
+
+### 🔁 Gempa Susulan (`gempa.stats.omori_mle`)
+
+- Deret gempa berasal dari declustering Gardner–Knopoff.
+- Peluruhan dimodelkan dengan Omori–Utsu n(t) = K/(t + c)^p; parameternya ditaksir dengan maximum likelihood (Ogata 1983) pada gempa susulan ≥ Mc antara 0,1 dan 100 hari. Jendela Gardner–Knopoff yang lebih panjang ikut memuat kegempaan latar dan menekan nilai p.
+- Deret khas memberi p ≈ 1 (mis. Laut Maluku 2019: 1,09; Laut Flores 2021: 0,99). Deret dengan p di luar 0,5–2 ditandai tidak meluruh seperti gempa susulan biasa.
+
+### 🐝 Klaster Spatio-Temporal (`gempa.swarm`)
+
+- ST-DBSCAN (Birant & Kut 2007) pada gempa ≥ Mc: dua gempa bertetangga bila jarak 3D ≤ 20 km **dan** selisih waktu ≤ 2 hari; klaster minimal 10 gempa.
+- Jenis klaster: **swarm/doublet** (selisih Mw terbesar dan kedua < 0,5), **bagian deret gempa lain** (sebagian besar gempanya susulan dari gempa utama yang lebih besar di luar klaster, mis. sepanjang ruptur Palu 2018), atau **gempa utama–susulan**.
+- Hasil: 125 klaster (34 swarm/doublet, 45 gempa utama–susulan, 46 bagian deret lain).
 
 ---
 
@@ -141,10 +159,10 @@ Versi scikit-learn saat training dicatat di `models/metadata.json` dan harus sam
 
 ### Deploy ke Streamlit Community Cloud
 
-Semua data dan model yang dibaca aplikasi sudah ada di repo (±43 MB), jadi tidak perlu langkah build.
+Aplikasi sudah berjalan di **https://classificasigempa-kmeansgit-rcdqnzzovc9qubgl7ravzn.streamlit.app/**. Untuk deploy ulang atau membuat salinan sendiri: semua data dan model yang dibaca aplikasi sudah ada di repo (±43 MB), jadi tidak perlu langkah build.
 
 1. Masuk ke [share.streamlit.io](https://share.streamlit.io) dengan akun GitHub, lalu **Create app → Deploy a public app from GitHub**.
-2. Repository `wisamWR/ClassificasiGempa-KMeans`, branch `dev-wsm` (atau `main`), main file `app/streamlit_app.py`.
+2. Repository `wisamWR/ClassificasiGempa-KMeans`, branch `dev-wsm`, main file `app/streamlit_app.py`.
 3. **Advanced settings → Python version: 3.11** (sama dengan versi saat model dilatih).
 4. Deploy. Dependency dibaca dari `requirements.txt`; konfigurasi tampilan dari `.streamlit/config.toml`.
 
@@ -153,8 +171,11 @@ Halaman Cek Lokasi (pencarian nama kota) dan Gempa Terkini butuh akses internet 
 ### Menjalankan Test
 
 ```bash
-pytest
+ruff check src tests app   # lint
+pytest                     # unit test + uji semua halaman aplikasi (AppTest, tanpa akses internet)
 ```
+
+GitHub Actions (`.github/workflows/ci.yml`) menjalankan keduanya pada setiap push ke `dev-wsm` dan setiap pull request.
 
 ---
 
@@ -164,8 +185,8 @@ pytest
 app/
   streamlit_app.py                 🧭 Entry point & navigasi halaman
   common.py                        🧩 Loader data/model (cache), konstanta, CSS, komponen bersama
-  views/                           📄 Halaman: cek_lokasi, zona, peta_gempa, kategorikan, eksplorasi,
-                                      metodologi, keselamatan
+  views/                           📄 Halaman: cek_lokasi, gempa_terkini, zona, peta_gempa, kategorikan,
+                                      susulan, swarm, eksplorasi, metodologi, keselamatan
 src/gempa/
   data.py                          📥 Load katalog BMKG
   clean.py                         🧹 Pembersihan katalog & laporan kualitas (CLI)
@@ -175,7 +196,7 @@ src/gempa/
   intensity.py                     📐 Intensitas episentrum & kelas MMI
   geo.py                           🌐 Jarak haversine
   reference.py                     🌍 Unduh & cocokkan katalog pembanding USGS (CLI)
-  stats.py                         📈 b-value, laju tahunan, periode ulang, probabilitas Poisson
+  stats.py                         📈 b-value, laju tahunan, periode ulang, probabilitas Poisson, Omori–Utsu
   zoning.py                        🧭 Zonasi seismik & statistik hazard per zona (CLI)
   location.py                      📍 Zona di suatu titik & peluang gempa dalam radius
   bmkg.py                          🔴 Ambil & parse feed gempa publik BMKG
