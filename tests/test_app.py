@@ -181,3 +181,55 @@ def test_eksplorasi_all_tabs():
 def test_static_pages(page, phrase):
     at = open_page(page)
     assert phrase in text(at)
+
+
+@pytest.fixture
+def bmkg_feeds(monkeypatch):
+    """Feed BMKG dari tests/data; tsunami=True mengubah gempa terbaru menjadi berpotensi tsunami."""
+    import json
+    from pathlib import Path
+
+    import streamlit as st
+
+    from gempa import bmkg
+
+    files = {"terbaru": "autogempa", "terkini": "gempaterkini", "dirasakan": "gempadirasakan"}
+    state = {"offline": False, "tsunami": False}
+
+    def fake_fetch(name, timeout=10):
+        if state["offline"]:
+            raise bmkg.FeedError("offline")
+        payload = json.loads((Path(__file__).parent / "data" / f"bmkg_{files[name]}.json").read_text(encoding="utf-8"))
+        if state["tsunami"] and name == "terbaru":
+            payload["Infogempa"]["gempa"]["Potensi"] = "Berpotensi tsunami"
+        return payload
+
+    monkeypatch.setattr(bmkg, "fetch_feed", fake_fetch)
+    st.cache_data.clear()
+    yield state
+    st.cache_data.clear()
+
+
+def test_gempa_terkini_page(bmkg_feeds):
+    at = open_page("gempa_terkini")
+    assert "BMKG" in text(at)
+    assert any("M 5.4" in m.value and "BURUSELATAN" in m.value for m in at.markdown)
+    assert any(m.value.startswith("Zona **DL-01**") for m in at.markdown)
+    assert not at.error
+    big, felt = at.dataframe[0].value, at.dataframe[1].value
+    assert len(big) == 15 and len(felt) == 15
+    assert big["Gempa sebesar ini di zona"].str.startswith("sekali tiap").all()
+    assert felt["Waktu (setempat)"].str.contains("WIB|WITA|WIT").all()
+
+
+def test_gempa_terkini_tsunami_alert(bmkg_feeds):
+    bmkg_feeds["tsunami"] = True
+    at = open_page("gempa_terkini")
+    assert any("Berpotensi tsunami" in e.value for e in at.error)
+
+
+def test_gempa_terkini_offline(bmkg_feeds):
+    bmkg_feeds["offline"] = True
+    at = open_page("gempa_terkini")
+    assert any("tidak bisa diambil" in w.value for w in at.warning)
+    assert not at.dataframe

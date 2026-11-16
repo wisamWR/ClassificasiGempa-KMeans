@@ -5,10 +5,8 @@ import streamlit as st
 from common import (LAYER_LABELS, MMI_ADVICE, MMI_COLORS, fmt_years, load_events, load_kmeans, load_zoning,
                     result_box)
 from gempa.intensity import MMI_DESCRIPTIONS, epicentral_intensity, mmi_class
-from gempa.location import distance_to_ring_km, point_in_ring
+from gempa.location import zone_context
 from gempa.magnitude import to_mw
-from gempa.stats import annual_rate
-from gempa.zoning import assign_zones
 
 MAG_TYPES = ["Mw", "M", "MLv", "ML", "mb"]
 FAR_FROM_ZONE_KM = 150
@@ -49,12 +47,10 @@ with left:
                "guncangan makin lemah.")
 
 # Zona: lapisan dari kedalaman, lalu centroid K-Means terdekat
-zone_id = assign_zones(models, [lat], [lon], [depth])[0]
+context = zone_context(models, zones, geojson, lat, lon, depth, mw).iloc[0]
+zone_id, distance = context["zone_id"], context["distance_km"]
 z = zones.set_index("zone_id").loc[zone_id]
-ring = next(f["geometry"]["coordinates"][0] for f in geojson["features"] if f["properties"]["zone_id"] == zone_id)
-distance = 0.0 if point_in_ring(lon, lat, ring) else distance_to_ring_km(lon, lat, ring)
 zone_events = df[df["in_zoning_set"] & (df["zone_id"] == zone_id)]
-rate = float(annual_rate(z["n_b"] / z["exposure_years"], z["b"], z["mc"], mw))
 smaller = (zone_events["mw"] < mw).mean()
 
 with right:
@@ -62,7 +58,7 @@ with right:
     st.markdown(f"#### 🧭 Zona {zone_id} · {z['name']}")
     st.markdown(
         f"- Lapisan **{LAYER_LABELS[z['layer']]}**, episentrum {position}.\n"
-        f"- Gempa utama **M ≥ {mw:.1f}** di zona ini rata-rata terjadi sekali tiap **{fmt_years(1 / rate)}**.\n"
+        f"- Gempa utama **M ≥ {mw:.1f}** di zona ini rata-rata terjadi sekali tiap **{fmt_years(context['recurrence_years'])}**.\n"
         f"- Lebih besar dari **{smaller:.0%}** gempa utama yang tercatat di zona ini "
         f"(terbesar: Mw {z['mw_max']:.1f}).\n"
         f"- b-value zona {z['b']:.2f} ± {z['b_sigma']:.2f}."

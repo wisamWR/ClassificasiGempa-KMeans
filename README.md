@@ -8,6 +8,8 @@ Aplikasi analisis kegempaan Indonesia berbasis katalog BMKG 2008–2025 dan **Ma
 
 > ⚠️ Aplikasi ini **tidak memprediksi gempa** dan bukan peta bahaya resmi. Informasi gempa terkini dan peringatan dini: [BMKG](https://www.bmkg.go.id). Kajian risiko bencana: [InaRISK BNPB](https://inarisk.bnpb.go.id).
 
+**Sumber data:** katalog gempa dan feed gempa terkini dari **BMKG** ([data.bmkg.go.id](https://data.bmkg.go.id/gempabumi/)); katalog pembanding [USGS ComCat](https://earthquake.usgs.gov/data/comcat/) (domain publik).
+
 ---
 
 ## 👥 Anggota Kelompok 2
@@ -29,6 +31,7 @@ Aplikasi multipage (`st.navigation`). Waktu gempa ditampilkan dalam **WIB/WITA/W
 | Halaman | Isi |
 | :-- | :-- |
 | 📍 **Cek Lokasi** (halaman awal) | Cari kota atau klik peta → zona sumber gempa di bawah lokasi (dangkal/menengah/dalam), peluang gempa utama M ≥ 5 dan M ≥ 6 dalam 10/50 tahun di radius pilihan (25–300 km), riwayat & 5 gempa terbesar, intensitas tertinggi yang pernah tercatat, dan linimasa gempa. |
+| 🔴 **Gempa Terkini** | Gempa terbaru, 15 gempa M ≥ 5, dan 15 gempa dirasakan dari feed publik **BMKG** (data.bmkg.go.id, disimpan sementara 5 menit), lengkap dengan shakemap, peringatan bila berpotensi tsunami, perkiraan intensitas, zona sumber, dan seberapa sering gempa sebesar itu terjadi di zonanya. |
 | 🧭 **Zona Seismik** | Peta poligon zona per lapisan kedalaman, diwarnai menurut peluang M ≥ 6/M ≥ 5, periode ulang, atau b-value; opsi heatmap. Klik zona untuk detail: statistik, grafik Gutenberg–Richter, dan gempa terbesar di zona. |
 | 🗺️ **Peta Gempa** | Seluruh gempa (marker cluster, warna = kelas MMI) dengan filter tanggal, Mw, lapisan kedalaman, kelas MMI, profil klaster, gempa utama, dan event semu. Maksimal 2.000 titik dengan sampel seimbang per kelas intensitas. |
 | ⚡ **Kategorikan Gempa** | Masukkan lintang, bujur, kedalaman, dan magnitudo (Mw, M, MLv, ML, atau mb yang dikonversi ke Mw) → kelas intensitas MMI + saran, zona sumber, seberapa sering gempa sebesar itu terjadi di zona tersebut, dan profil klaster K-Means. |
@@ -109,7 +112,7 @@ Pastikan Anda memiliki [Python](https://www.python.org/) yang terinstall di komp
    ```bash
    streamlit run app/streamlit_app.py
    ```
-   Pencarian nama kota memakai layanan Nominatim (OpenStreetMap), jadi butuh koneksi internet; titik juga bisa dipilih dengan klik peta.
+   Pencarian nama kota memakai layanan Nominatim (OpenStreetMap) dan halaman Gempa Terkini memakai feed BMKG, jadi keduanya butuh koneksi internet; titik juga bisa dipilih dengan klik peta.
    Aplikasi akan otomatis terbuka di browser Anda (biasanya di `http://localhost:8501`).
 
 ### Melatih Ulang Model
@@ -160,6 +163,7 @@ src/gempa/
   stats.py                         📈 b-value, laju tahunan, periode ulang, probabilitas Poisson
   zoning.py                        🧭 Zonasi seismik & statistik hazard per zona (CLI)
   location.py                      📍 Zona di suatu titik & peluang gempa dalam radius
+  bmkg.py                          🔴 Ambil & parse feed gempa publik BMKG
   timezones.py                     🕒 Perkiraan zona waktu WIB/WITA/WIT dari koordinat
   train.py                         🤖 Pencarian k, training, pelabelan, simpan artifact (CLI)
   paths.py                         📁 Lokasi file data & model
@@ -168,6 +172,7 @@ notebooks/
   earthquake_clustering.ipynb      🔬 Eksplorasi, visualisasi, dan evaluasi K-Means
   seismic_zoning.ipynb             🧭 Zonasi seismik, K-Means vs HDBSCAN, statistik Gutenberg–Richter
 tests/                             🧪 Unit test + uji semua halaman aplikasi (AppTest)
+  data/bmkg_*.json                 🔴 Contoh feed BMKG untuk test (tanpa akses internet)
 data/
   raw/katalog_gempa_v2.tsv         💾 Katalog gempa BMKG (data mentah)
   raw/usgs_comcat_m4.0_2008_2025.csv  🌍 Katalog pembanding USGS ComCat M ≥ 4 (domain publik)

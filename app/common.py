@@ -17,8 +17,10 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR / "src") not in sys.path:
     sys.path.insert(0, str(ROOT_DIR / "src"))
 
-from gempa import paths  # noqa: E402
-from gempa.intensity import MMI_CLASSES, MMI_DESCRIPTIONS  # noqa: E402
+from gempa import bmkg, paths  # noqa: E402
+from gempa.intensity import MMI_CLASSES, MMI_DESCRIPTIONS, epicentral_intensity, mmi_class  # noqa: E402
+from gempa.location import zone_context  # noqa: E402
+from gempa.magnitude import to_mw  # noqa: E402
 from gempa.stats import annual_rate  # noqa: E402
 from gempa.timezones import to_local_time  # noqa: E402
 from gempa.zoning import DEPTH_LAYERS, depth_layer  # noqa: E402
@@ -130,6 +132,23 @@ def load_report():
 
 def mc_by_year():
     return {row["year"]: row["mc"] for row in load_report()["completeness"]["by_year"]}
+
+
+# Feed BMKG disimpan 5 menit: cukup segar dan jauh di bawah batas 60 permintaan/menit
+@st.cache_data(ttl=300, show_spinner="Mengambil data gempa terkini dari BMKG...")
+def load_bmkg(feed):
+    """(gempa feed BMKG + Mw, intensitas, zona & konteks zona, waktu setempat; waktu pengambilan UTC)."""
+    df = bmkg.parse_feed(bmkg.fetch_feed(feed))
+    fetched_at = pd.Timestamp.now(tz="UTC")
+    if df.empty:
+        return df, fetched_at
+    models, zones, geojson, _ = load_zoning()
+    df["mw"] = to_mw(df["mag"], pd.Series(bmkg.MAG_TYPE, index=df.index))["mw"].to_numpy()
+    df["intensity"] = epicentral_intensity(df["mw"].to_numpy(), df["depth"].to_numpy())
+    df["mmi_class"] = np.asarray(mmi_class(df["intensity"].to_numpy())).astype(str)
+    df["local_time"], df["tz"] = to_local_time(df["time"], df["latitude"], df["longitude"])
+    context = zone_context(models, zones, geojson, df["latitude"], df["longitude"], df["depth"], df["mw"])
+    return pd.concat([df, context], axis=1), fetched_at
 
 
 @st.cache_data(show_spinner=False, ttl=24 * 3600)

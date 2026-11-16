@@ -16,6 +16,7 @@ inject_css()
 pages = {
     "Peta": [
         st.Page("views/cek_lokasi.py", title="Cek Lokasi", icon="📍", default=True),
+        st.Page("views/gempa_terkini.py", title="Gempa Terkini", icon="🔴"),
         st.Page("views/zona.py", title="Zona Seismik", icon="🧭"),
         st.Page("views/peta_gempa.py", title="Peta Gempa", icon="🗺️"),
     ],
