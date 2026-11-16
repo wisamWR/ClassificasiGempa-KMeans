@@ -32,10 +32,10 @@ Aplikasi multipage (`st.navigation`). Waktu gempa ditampilkan dalam **WIB/WITA/W
 | :-- | :-- |
 | 📍 **Cek Lokasi** (halaman awal) | Cari kota atau klik peta → zona sumber gempa di bawah lokasi (dangkal/menengah/dalam), peluang gempa utama M ≥ 5 dan M ≥ 6 dalam 10/50 tahun di radius pilihan (25–300 km), riwayat & 5 gempa terbesar, intensitas tertinggi yang pernah tercatat, dan linimasa gempa. |
 | 🔴 **Gempa Terkini** | Gempa terbaru, 15 gempa M ≥ 5, dan 15 gempa dirasakan dari feed publik **BMKG** (data.bmkg.go.id, disimpan sementara 5 menit), lengkap dengan shakemap, peringatan bila berpotensi tsunami, perkiraan intensitas, zona sumber, dan seberapa sering gempa sebesar itu terjadi di zonanya. |
-| 🧭 **Zona Seismik** | Peta poligon zona per lapisan kedalaman, diwarnai menurut peluang M ≥ 6/M ≥ 5, periode ulang, atau b-value; opsi heatmap. Klik zona untuk detail: statistik, grafik Gutenberg–Richter, dan gempa terbesar di zona. |
+| 🧭 **Zona Seismik** | Peta poligon zona per lapisan kedalaman, diwarnai menurut peluang M ≥ 6/M ≥ 5, periode ulang, atau b-value; opsi heatmap. Klik zona untuk detail: statistik, grafik Gutenberg–Richter, gempa terbesar, dan proporsi jenis sesar di zona. |
 | 🗺️ **Peta Gempa** | Seluruh gempa (marker cluster, warna = kelas MMI) dengan filter tanggal, Mw, lapisan kedalaman, kelas MMI, profil klaster, gempa utama, dan event semu. Maksimal 2.000 titik dengan sampel seimbang per kelas intensitas. |
 | ⚡ **Kategorikan Gempa** | Masukkan lintang, bujur, kedalaman, dan magnitudo (Mw, M, MLv, ML, atau mb yang dikonversi ke Mw) → kelas intensitas MMI + saran, zona sumber, seberapa sering gempa sebesar itu terjadi di zona tersebut, dan profil klaster K-Means. |
-| 📊 **Eksplorasi Data** | Distribusi magnitudo, grafik Gutenberg–Richter, deret waktu bulanan, Mc dan tingkat verifikasi USGS per tahun, penampang kedalaman (Jawa, Sumatra, Laut Maluku, Laut Banda), dan tampilan **3D** (pydeck) yang memperlihatkan lempeng menunjam. |
+| 📊 **Eksplorasi Data** | Distribusi magnitudo, grafik Gutenberg–Richter, deret waktu bulanan, Mc dan tingkat verifikasi USGS per tahun, penampang kedalaman (Jawa, Sumatra, Laut Maluku, Laut Banda), tampilan **3D** (pydeck) yang memperlihatkan lempeng menunjam, dan peta **jenis sesar** dari 3.864 mekanisme fokal (klasifikasi Frohlich 1992). |
 | 📘 **Metodologi** | Pipeline, metrik model, perbandingan K-Means vs HDBSCAN, keterbatasan, dan referensi. |
 | 🛡️ **Panduan Keselamatan** | Panduan sebelum, saat, dan sesudah gempa, serta legenda kelas intensitas MMI. |
 
@@ -127,6 +127,7 @@ python -m gempa.reference  # opsional: unduh ulang katalog pembanding USGS (suda
 python -m gempa.clean      # katalog bersih + laporan (data/processed/catalog_*.{parquet,json})
 python -m gempa.train      # sudah menjalankan pembersihan yang sama sebelum training
 python -m gempa.zoning     # zonasi seismik + statistik hazard (memakai katalog bersih)
+python -m gempa.focal      # jenis sesar dari mekanisme fokal
 
 # Opsi 2: notebook (jalankan dari folder notebooks/, Restart & Run All)
 jupyter notebook notebooks/earthquake_clustering.ipynb
@@ -164,6 +165,7 @@ src/gempa/
   zoning.py                        🧭 Zonasi seismik & statistik hazard per zona (CLI)
   location.py                      📍 Zona di suatu titik & peluang gempa dalam radius
   bmkg.py                          🔴 Ambil & parse feed gempa publik BMKG
+  focal.py                         🪨 Jenis sesar dari mekanisme fokal (CLI)
   timezones.py                     🕒 Perkiraan zona waktu WIB/WITA/WIT dari koordinat
   train.py                         🤖 Pencarian k, training, pelabelan, simpan artifact (CLI)
   paths.py                         📁 Lokasi file data & model
@@ -180,6 +182,7 @@ data/
   processed/catalog_report.json    🧾 Laporan pembersihan katalog
   processed/catalog_clean.parquet  🧹 Katalog bersih lengkap (tidak di-commit, buat dengan gempa.clean)
   processed/zone_events.parquet    🧭 Zona tiap event (eventID → zone_id)
+  processed/focal_mechanisms.parquet  🪨 Bidang nodal, plunge P/T/B, dan jenis sesar (gempa.focal)
 models/
   kmeans_pipeline.joblib           🤖 Pipeline MinMaxScaler + K-Means terlatih
   cluster_info.csv                 📊 Rata-rata fitur, severity score, dan label tiap klaster

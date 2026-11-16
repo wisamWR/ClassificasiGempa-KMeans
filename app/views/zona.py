@@ -5,7 +5,11 @@ from folium.plugins import HeatMap
 from streamlit_folium import st_folium
 
 from common import (LAYER_CODES, LAYER_LABELS, MAP_DEFAULT_CENTER, colormap_for, events_table, fmt_prob, fmt_years,
-                    gr_chart, load_events, load_zoning, mc_by_year, zone_layer)
+                    gr_chart, load_events, load_focal, load_zoning, mc_by_year, zone_layer)
+from gempa.focal import FAULT_LABELS, FAULT_TYPES
+
+# Warna teks Streamlit yang mendekati FAULT_COLORS
+FAULT_BADGE = {"naik": "red", "turun": "blue", "geser": "green", "oblik": "gray"}
 
 # label -> (kolom zone_stats, warna rendah -> tinggi, format legenda)
 ZONE_METRICS = {
@@ -106,3 +110,11 @@ with right:
     st.markdown("**Gempa terbesar di zona ini**")
     zone_all = df[(df["zone_id"] == zone_id) & ~df["suspect_event"]]
     st.dataframe(events_table(zone_all, 5).drop(columns=["MMI"]), hide_index=True, width="stretch")
+
+    zone_fm = load_focal().query("zone_id == @zone_id")
+    st.markdown(f"**Jenis sesar** ({len(zone_fm)} mekanisme fokal BMKG)")
+    if len(zone_fm) >= 5:
+        shares = zone_fm["fault_type"].value_counts(normalize=True).reindex(FAULT_TYPES, fill_value=0)
+        st.markdown(" · ".join(f":{FAULT_BADGE[t]}[{FAULT_LABELS[t]} **{share:.0%}**]" for t, share in shares.items()))
+    else:
+        st.caption("Mekanisme fokal di zona ini terlalu sedikit untuk dirangkum.")

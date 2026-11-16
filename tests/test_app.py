@@ -151,6 +151,7 @@ def test_zona_all_layers_and_detail():
     at.selectbox(key="zona_metric").set_value("b-value")
     run(at)
     assert at.subheader[0].value.startswith("DK-05")
+    assert any(m.value.startswith("**Jenis sesar** (") for m in at.markdown)
 
 
 def test_kategorikan_default_cianjur():
@@ -169,6 +170,7 @@ def test_kategorikan_default_cianjur():
 
 def test_eksplorasi_all_tabs():
     at = open_page("eksplorasi")
+    assert "Frohlich (1992)" in text(at)
     for section in at.selectbox(key="eks_section").options:
         at.selectbox(key="eks_section").set_value(section)
         run(at)

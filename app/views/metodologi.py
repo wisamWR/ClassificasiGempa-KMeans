@@ -47,6 +47,12 @@ Feed publik BMKG (`autogempa`, `gempaterkini`, `gempadirasakan` di data.bmkg.go.
 disimpan sementara 5 menit (batas BMKG 60 permintaan per menit). Magnitudo BMKG dikonversi ke Mw seperti tipe M di
 katalog, lalu tiap gempa diberi perkiraan intensitas, zona sumber, dan selang waktu rata-rata gempa sebesar itu di
 zonanya. Sumber data: BMKG.
+
+#### 6. Mekanisme fokal (`gempa.focal`)
+Bidang nodal (strike/dip/rake) dari katalog BMKG diubah menjadi sumbu tekanan (P), tarikan (T), dan netral (B).
+Jenis sesar mengikuti Frohlich (1992): plunge T > 50° = sesar naik, plunge P > 60° = sesar turun, plunge B > 60° =
+sesar geser, selain itu oblik. Kedua bidang nodal memberi jenis yang sama, karena sumbu P/T/B tidak bergantung pada
+pilihan bidang.
 """)
 
 st.markdown("#### Metrik model")
@@ -88,6 +94,7 @@ st.markdown(f"""
 #### Referensi
 - Aki, K. (1965). Maximum likelihood estimate of b in the formula log N = a − bM and its confidence limits. *Bull. Earthq. Res. Inst.*, 43, 237–239.
 - Campello, R. J. G. B., Moulavi, D. & Sander, J. (2013). Density-based clustering based on hierarchical density estimates. *PAKDD 2013*, 160–172.
+- Frohlich, C. (1992). Triangle diagrams: ternary graphs to display similarity and diversity of earthquake focal mechanisms. *Phys. Earth Planet. Inter.*, 75, 193–198.
 - Gardner, J. K. & Knopoff, L. (1974). Is the sequence of earthquakes in Southern California, with aftershocks removed, Poissonian? *BSSA*, 64(5), 1363–1367.
 - Gutenberg, B. & Richter, C. F. (1944). Frequency of earthquakes in California. *BSSA*, 34(4), 185–188.
 - Gutenberg, B. & Richter, C. F. (1956). Earthquake magnitude, intensity, energy, and acceleration. *BSSA*, 46(2), 105–145.
