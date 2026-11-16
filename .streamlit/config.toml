@@ -1,0 +1,10 @@
+[server]
+# Data dibaca dari file yang di-commit; tidak perlu memantau perubahan kode di server deploy
+runOnSave = false
+
+[client]
+# Sembunyikan menu pengembang (Deploy, Rerun, dsb.) dari pengunjung
+toolbarMode = "viewer"
+
+[browser]
+gatherUsageStats = false

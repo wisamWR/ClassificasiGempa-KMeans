@@ -6,6 +6,7 @@ joblib==1.6.0
 pyarrow==26.0.1
 # Harus sama dengan versi saat model di models/ dilatih (lihat models/metadata.json)
 scikit-learn==1.9.1
+scipy==1.17.1
 folium==0.20.0
 streamlit-folium==0.27.4
 geopy==2.5.0
