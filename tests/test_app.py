@@ -235,3 +235,17 @@ def test_gempa_terkini_offline(bmkg_feeds):
     at = open_page("gempa_terkini")
     assert any("tidak bisa diambil" in w.value for w in at.warning)
     assert not at.dataframe
+
+
+def test_susulan_sequences(events):
+    at = open_page("susulan")
+    assert at.metric[0].label == "Gempa utama"
+    assert "Ogata 1983" in text(at) and "p = " in text(at)
+    assert len(at.selectbox(key="susulan_sequence").options) == 20
+    # Deret terbesar dengan gempa utama < Mw 5: swarm yang tidak meluruh seperti Omori
+    real = events[~events["suspect_event"]]
+    largest = real.groupby("sequence_id").size().nlargest(20).index
+    mains = real.set_index("eventID").loc[largest, "mw"]
+    at.selectbox(key="susulan_sequence").set_value(mains[mains < 5].index[0])
+    run(at)
+    assert any("tidak meluruh" in w.value for w in at.warning)
