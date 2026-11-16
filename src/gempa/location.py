@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 
 from gempa.geo import haversine_km
-from gempa.stats import poisson_probability
+from gempa.stats import annual_rate, poisson_probability
+from gempa.zoning import assign_zones
 
 KM_PER_DEG_LAT = 110.57
 KM_PER_DEG_LON = 111.32
@@ -48,6 +49,26 @@ def zones_at_point(geojson, lat, lon):
     order = {code: i for i, code in enumerate(dict.fromkeys(zones["layer"]))}
     best = zones.sort_values(["layer", "distance_km"]).groupby("layer", sort=False).head(1)
     return best.sort_values("layer", key=lambda s: s.map(order)).reset_index(drop=True)
+
+
+def zone_context(models, zones, geojson, lat, lon, depth, mw):
+    """Zona sumber tiap gempa + seberapa sering gempa sebesar itu terjadi di zona tersebut.
+
+    Mengembalikan DataFrame zone_id, zone_name, distance_km (0 bila di dalam poligon zona) dan
+    recurrence_years (rata-rata selang waktu gempa utama >= mw di zona, dari relasi Gutenberg-Richter zona).
+    """
+    lat, lon, depth, mw = (np.atleast_1d(np.asarray(v, dtype=float)) for v in (lat, lon, depth, mw))
+    zone_ids = assign_zones(models, lat, lon, depth)
+    rings = {f["properties"]["zone_id"]: f["geometry"]["coordinates"][0] for f in geojson["features"]}
+    distance = [0.0 if point_in_ring(x, y, rings[z]) else distance_to_ring_km(x, y, rings[z])
+                for z, x, y in zip(zone_ids, lon, lat)]
+    stats = zones.set_index("zone_id").reindex(zone_ids)
+    rate = annual_rate(stats["n_b"].to_numpy() / stats["exposure_years"].to_numpy(), stats["b"].to_numpy(),
+                       stats["mc"].to_numpy(), mw)
+    with np.errstate(divide="ignore"):
+        recurrence = np.where(rate > 0, 1 / rate, np.inf)
+    return pd.DataFrame({"zone_id": zone_ids, "zone_name": stats["name"].to_numpy(),
+                         "distance_km": distance, "recurrence_years": recurrence})
 
 
 def radius_hazard(events, zones, lat, lon, radius_km):
