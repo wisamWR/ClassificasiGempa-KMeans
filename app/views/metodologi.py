@@ -58,6 +58,12 @@ pilihan bidang.
 Deret gempa susulan berasal dari declustering Gardner–Knopoff. Peluruhannya dimodelkan dengan relasi Omori–Utsu
 n(t) = K/(t + c)^p yang parameternya ditaksir dengan maximum likelihood (Ogata 1983), memakai gempa susulan ≥ Mc
 antara 0,1 dan 100 hari setelah gempa utama.
+
+#### 8. Klaster spatio-temporal (`gempa.swarm`)
+ST-DBSCAN (Birant & Kut 2007) pada gempa ≥ Mc tahunan: dua gempa bertetangga bila jarak 3D ≤ 20 km **dan** selisih
+waktu ≤ 2 hari; klaster minimal 10 gempa. Klaster tanpa gempa dominan (selisih Mw terbesar dan kedua < 0,5) disebut
+swarm/doublet; klaster yang sebagian besar gempanya susulan dari gempa utama lebih besar di luar klaster ditandai
+sebagai bagian deret gempa lain.
 """)
 
 st.markdown("#### Metrik model")
@@ -98,6 +104,7 @@ st.markdown(f"""
 
 #### Referensi
 - Aki, K. (1965). Maximum likelihood estimate of b in the formula log N = a − bM and its confidence limits. *Bull. Earthq. Res. Inst.*, 43, 237–239.
+- Birant, D. & Kut, A. (2007). ST-DBSCAN: An algorithm for clustering spatial–temporal data. *Data & Knowledge Engineering*, 60(1), 208–221.
 - Campello, R. J. G. B., Moulavi, D. & Sander, J. (2013). Density-based clustering based on hierarchical density estimates. *PAKDD 2013*, 160–172.
 - Frohlich, C. (1992). Triangle diagrams: ternary graphs to display similarity and diversity of earthquake focal mechanisms. *Phys. Earth Planet. Inter.*, 75, 193–198.
 - Gardner, J. K. & Knopoff, L. (1974). Is the sequence of earthquakes in Southern California, with aftershocks removed, Poissonian? *BSSA*, 64(5), 1363–1367.

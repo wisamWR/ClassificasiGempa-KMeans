@@ -249,3 +249,14 @@ def test_susulan_sequences(events):
     at.selectbox(key="susulan_sequence").set_value(mains[mains < 5].index[0])
     run(at)
     assert any("tidak meluruh" in w.value for w in at.warning)
+
+
+def test_swarm_page():
+    clusters = pd.read_parquet(paths.ST_CLUSTERS)
+    at = open_page("swarm")
+    assert metric(at, "Klaster") == f"{len(clusters):,}"
+    assert len(at.dataframe[0].value) == len(clusters)
+    at.multiselect(key="swarm_kinds").set_value(["swarm"])
+    run(at)
+    assert len(at.dataframe[0].value) == (clusters["kind"] == "swarm").sum()
+    assert (at.dataframe[0].value["Jenis"] == "Swarm / doublet").all()
