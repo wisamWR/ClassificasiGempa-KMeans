@@ -18,6 +18,7 @@ if str(ROOT_DIR / "src") not in sys.path:
     sys.path.insert(0, str(ROOT_DIR / "src"))
 
 from gempa import bmkg, paths  # noqa: E402
+from gempa.focal import FAULT_LABELS, FAULT_TYPES  # noqa: E402
 from gempa.intensity import MMI_CLASSES, MMI_DESCRIPTIONS, epicentral_intensity, mmi_class  # noqa: E402
 from gempa.location import zone_context  # noqa: E402
 from gempa.magnitude import to_mw  # noqa: E402
@@ -35,6 +36,7 @@ MMI_ADVICE = {
 }
 LAYER_LABELS = {"DK": "Dangkal (< 70 km)", "MN": "Menengah (70–300 km)", "DL": "Dalam (> 300 km)"}
 LAYER_CODES = [code for code, _, _ in DEPTH_LAYERS]
+FAULT_COLORS = {"naik": "#d62728", "turun": "#1f77b4", "geser": "#2ca02c", "oblik": "#9e9e9e"}
 # Profil klaster K-Means (relatif antar-klaster, bukan risiko absolut)
 PROFILE_ORDER = ["Low", "Moderate", "High", "Very High"]
 SIGNIFICANT_MW = 5.0
@@ -105,6 +107,32 @@ def load_events():
     df["layer"] = depth_layer(df["depth"])
     df["local_time"], df["tz"] = to_local_time(df["time"], df["latitude"], df["longitude"])
     return df
+
+
+@st.cache_data
+def load_focal():
+    """Mekanisme fokal (gempa.focal) + Mw, zona, dan lapisan event; tanpa event semu."""
+    fm = pd.read_parquet(paths.FOCAL_MECHANISMS)
+    events = load_events()[["eventID", "mw", "zone_id", "layer", "suspect_event", "location"]]
+    fm = fm.merge(events, on="eventID", how="inner", validate="one_to_one")
+    fm = fm[~fm["suspect_event"]].reset_index(drop=True)
+    fm["jenis"] = fm["fault_type"].astype(str).map(FAULT_LABELS)
+    return fm
+
+
+def fault_type_chart(fm, by=None, sort=None, height=220):
+    """Bar proporsi jenis sesar (opsional per kelompok `by`)."""
+    labels = [FAULT_LABELS[t] for t in FAULT_TYPES]
+    color = alt.Color("jenis:N", title="Jenis sesar", sort=labels,
+                      scale=alt.Scale(domain=labels, range=[FAULT_COLORS[t] for t in FAULT_TYPES]))
+    x = alt.X("count():Q", stack="normalize", title="Proporsi", axis=alt.Axis(format="%"))
+    chart = alt.Chart(fm[["jenis"] + ([by] if by else [])]).mark_bar().encode(
+        x=x, color=color, order=alt.Order("jenis_order:Q"), tooltip=["jenis", "count()"],
+    ).transform_calculate(jenis_order=f"indexof({labels}, datum.jenis)")
+    if by:
+        chart = chart.encode(y=alt.Y(f"{by}:N", title=None, sort=sort))
+    # Kelompok: tinggi per batang tetap agar label tidak bertumpuk; tanpa kelompok: satu batang setinggi `height`
+    return chart.properties(height=alt.Step(36) if by else height)
 
 
 @st.cache_resource

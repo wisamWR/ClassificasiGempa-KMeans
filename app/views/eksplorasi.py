@@ -5,7 +5,9 @@ import pandas as pd
 import pydeck as pdk
 import streamlit as st
 
-from common import LAYER_LABELS, gr_chart, load_events, load_report, load_zoning, mc_by_year
+from common import (FAULT_COLORS, LAYER_LABELS, fault_type_chart, gr_chart, load_events, load_focal, load_report,
+                    load_zoning, mc_by_year)
+from gempa.focal import FAULT_LABELS, FAULT_TYPES
 from gempa.stats import b_value, complete_exposure_years
 
 # Penampang: (sumbu horizontal, kolom pita, batas pita, batas sumbu)
@@ -31,7 +33,8 @@ real = df[~df["suspect_event"]]
 st.title("📊 Eksplorasi Data")
 st.caption(f"{len(real):,} gempa (tanpa event semu) dari katalog BMKG {df['time'].min():%Y}–{df['time'].max():%Y}.")
 
-tab_mag, tab_time, tab_depth, tab_3d = st.tabs(["Magnitudo", "Waktu", "Penampang kedalaman", "3D"])
+tab_mag, tab_time, tab_depth, tab_3d, tab_fm = st.tabs(
+    ["Magnitudo", "Waktu", "Penampang kedalaman", "3D", "Mekanisme fokal"])
 
 with tab_mag:
     left, right = st.columns(2)
@@ -129,3 +132,25 @@ with tab_3d:
     st.pydeck_chart(deck, height=560)
     st.caption(f"{len(pts):,} gempa Mw ≥ 4. Merah = dangkal, oranye = menengah, biru = dalam. Seret untuk memutar, "
                "Ctrl/Shift + seret untuk mengubah sudut pandang.")
+
+with tab_fm:
+    fm = load_focal()
+    labels = [FAULT_LABELS[t] for t in FAULT_TYPES]
+    st.caption(f"{len(fm):,} mekanisme fokal BMKG ({fm['time'].min():%Y}–{fm['time'].max():%Y}). Jenis sesar "
+               "ditentukan dari kemiringan sumbu tekanan (P), tarikan (T), dan netral (B) menurut Frohlich (1992): "
+               "T curam = sesar naik, P curam = sesar turun, B curam = sesar geser, selain itu oblik.")
+    # Skala proyeksi eksplisit: Vega-Lite tidak otomatis menyesuaikan peta ke sebaran data
+    chart = alt.Chart(fm[["longitude", "latitude", "jenis", "mw", "depth", "location"]]).mark_circle(
+        opacity=0.7).encode(
+        longitude="longitude:Q", latitude="latitude:Q",
+        size=alt.Size("mw:Q", legend=None, scale=alt.Scale(range=[4, 90])),
+        color=alt.Color("jenis:N", title="Jenis sesar", sort=labels,
+                        scale=alt.Scale(domain=labels, range=[FAULT_COLORS[t] for t in FAULT_TYPES])),
+        tooltip=["jenis", alt.Tooltip("mw:Q", format=".1f"), "depth", "location"],
+    ).project(type="mercator", center=[118, -2.5], scale=950).properties(height=440, title="Sebaran jenis sesar")
+    st.altair_chart(chart, width="stretch")
+    by_layer = fm.assign(lapisan=fm["layer"].map(LAYER_LABELS))
+    st.altair_chart(fault_type_chart(by_layer, by="lapisan", sort=list(LAYER_LABELS.values()))
+                    .properties(title="Proporsi per lapisan kedalaman"), width="stretch")
+    st.caption("Gempa dangkal didominasi sesar naik (zona subduksi dan sesar anjak) dan sesar geser, sedangkan "
+               "gempa dalam lebih banyak sesar turun dan oblik. Jenis sesar per zona ada di **Zona Seismik**.")
