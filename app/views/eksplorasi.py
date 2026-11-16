@@ -85,7 +85,8 @@ with tab_time:
         ).properties(title="Magnitude of completeness per tahun", height=260), width="stretch")
     with right:
         st.altair_chart(alt.Chart(yearly).mark_bar().encode(
-            x=alt.X("year:O", title="Tahun"), y=alt.Y("cocok:Q", title="Tercatat juga di USGS", axis=alt.Axis(format="%")),
+            x=alt.X("year:O", title="Tahun"),
+            y=alt.Y("cocok:Q", title="Tercatat juga di USGS", axis=alt.Axis(format="%")),
             color=alt.condition(alt.datum.cocok < 0.8, alt.value("#C44E52"), alt.value("#4C72B0")),
         ).properties(title="Verifikasi gempa Mw ≥ 5 dengan katalog USGS", height=260), width="stretch")
     st.caption("Mc turun seiring bertambahnya stasiun BMKG. Pada 2019–2021 banyak gempa Mw ≥ 5 di katalog tidak "

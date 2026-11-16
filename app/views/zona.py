@@ -64,7 +64,8 @@ st.dataframe(
         p50_m6=layer_zones["p50_m6"].map(fmt_prob),
     )[["zone_id", "name", "n_events", "mw_max", "b", "return_period_m5", "return_period_m6", "p10_m6", "p50_m6"]]
     .rename(columns={"zone_id": "Zona", "name": "Nama", "n_events": "Gempa utama", "mw_max": "Mw maks",
-                     "b": "b-value", "return_period_m5": "Periode ulang M ≥ 5", "return_period_m6": "Periode ulang M ≥ 6",
+                     "b": "b-value", "return_period_m5": "Periode ulang M ≥ 5",
+                     "return_period_m6": "Periode ulang M ≥ 6",
                      "p10_m6": "P(M ≥ 6, 10 th)", "p50_m6": "P(M ≥ 6, 50 th)"}),
     hide_index=True, width="stretch",
 )
@@ -89,7 +90,8 @@ for col, (mag, t) in zip(cols, [(5, 10), (5, 50), (6, 10), (6, 50)]):
 st.caption(
     f"Periode ulang M ≥ 5: {fmt_years(z['return_period_m5'])}; M ≥ 6: {fmt_years(z['return_period_m6'])}. "
     f"Kedalaman median {z['depth_median']:.0f} km. Selama katalog tercatat {z['observed_m5']} gempa utama M ≥ 5 "
-    f"(model: {z['expected_m5_catalog']:.0f}) dan {z['observed_m6']} gempa M ≥ 6 (model: {z['expected_m6_catalog']:.0f})."
+    f"(model: {z['expected_m5_catalog']:.0f}) dan {z['observed_m6']} gempa M ≥ 6 "
+    f"(model: {z['expected_m6_catalog']:.0f})."
     + (" b-value memakai nilai lapisan karena data zona terlalu sedikit." if z["b_source"] == "lapisan" else "")
 )
 

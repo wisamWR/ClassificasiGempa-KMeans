@@ -25,7 +25,8 @@ zoning_set = df[df["in_zoning_set"]]
 period_years = (df["time"].max() - df["time"].min()).total_seconds() / (365.25 * 86400)
 
 st.title("📍 Cek Lokasi")
-st.caption("Cari nama kota atau klik peta untuk melihat zona sumber gempa, peluang gempa, dan riwayat gempa di sekitarnya.")
+st.caption("Cari nama kota atau klik peta untuk melihat zona sumber gempa, peluang gempa, dan riwayat gempa "
+           "di sekitarnya.")
 
 c1, c2 = st.columns([3, 1])
 query = c1.text_input("Nama kota/daerah", key="cek_query",

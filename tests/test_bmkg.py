@@ -41,7 +41,8 @@ def test_parse_event_lists(name, column):
 
 def test_parse_skips_incomplete_events_and_rejects_unknown_format():
     payload = {"Infogempa": {"gempa": [
-        {"DateTime": "2026-01-01T00:00:00+00:00", "Coordinates": "-7.1,107.2", "Magnitude": "4.1", "Kedalaman": "10 km"},
+        {"DateTime": "2026-01-01T00:00:00+00:00", "Coordinates": "-7.1,107.2", "Magnitude": "4.1",
+         "Kedalaman": "10 km"},
         {"DateTime": "2026-01-02T00:00:00+00:00", "Coordinates": "", "Magnitude": "4.5", "Kedalaman": "10 km"},
     ]}}
     df = bmkg.parse_feed(payload)
