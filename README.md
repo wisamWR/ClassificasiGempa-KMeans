@@ -1,10 +1,12 @@
-# 🌋 Earthquake Clustering Viewer
+# 🌋 Zona Gempa Indonesia (Earthquake Clustering Viewer)
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
 ![Scikit-Learn](https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
 
-Visualisasi interaktif dan analisis persebaran gempa bumi menggunakan **Machine Learning (K-Means Clustering)**. Aplikasi ini membantu mengidentifikasi pola kegempaan, tingkat risiko, dan karakteristik setiap klaster gempa di wilayah Indonesia dan sekitarnya.
+Aplikasi analisis kegempaan Indonesia berbasis katalog BMKG 2008–2025 dan **Machine Learning (K-Means Clustering)**. K-Means dipakai untuk membagi wilayah menjadi **zona sumber gempa**, lalu tiap zona diberi statistik Gutenberg–Richter: b-value, periode ulang, dan peluang gempa M ≥ 5 / M ≥ 6. Pengguna bisa mengecek kotanya, menjelajah zona, dan membaca konteks sebuah gempa.
+
+> ⚠️ Aplikasi ini **tidak memprediksi gempa** dan bukan peta bahaya resmi. Informasi gempa terkini dan peringatan dini: [BMKG](https://www.bmkg.go.id). Kajian risiko bencana: [InaRISK BNPB](https://inarisk.bnpb.go.id).
 
 ---
 
@@ -20,17 +22,27 @@ Visualisasi interaktif dan analisis persebaran gempa bumi menggunakan **Machine 
 
 ---
 
-## 🌟 Fitur Utama
+## 🌟 Halaman Aplikasi
 
-### 1. 🗺️ Peta Interaktif
+Aplikasi multipage (`st.navigation`). Waktu gempa ditampilkan dalam **WIB/WITA/WIT** (perkiraan dari koordinat).
 
-Visualisasi titik gempa historis (katalog BMKG, November 2008 – Oktober 2025) di atas peta interaktif. Warna marker menunjukkan **estimasi intensitas di episentrum (skala MMI)** tiap gempa.
+| Halaman | Isi |
+| :-- | :-- |
+| 📍 **Cek Lokasi** (halaman awal) | Cari kota atau klik peta → zona sumber gempa di bawah lokasi (dangkal/menengah/dalam), peluang gempa utama M ≥ 5 dan M ≥ 6 dalam 10/50 tahun di radius pilihan (25–300 km), riwayat & 5 gempa terbesar, intensitas tertinggi yang pernah tercatat, dan linimasa gempa. |
+| 🧭 **Zona Seismik** | Peta poligon zona per lapisan kedalaman, diwarnai menurut peluang M ≥ 6/M ≥ 5, periode ulang, atau b-value; opsi heatmap. Klik zona untuk detail: statistik, grafik Gutenberg–Richter, dan gempa terbesar di zona. |
+| 🗺️ **Peta Gempa** | Seluruh gempa (marker cluster, warna = kelas MMI) dengan filter tanggal, Mw, lapisan kedalaman, kelas MMI, profil klaster, gempa utama, dan event semu. Maksimal 2.000 titik dengan sampel seimbang per kelas intensitas. |
+| ⚡ **Kategorikan Gempa** | Masukkan lintang, bujur, kedalaman, dan magnitudo (Mw, M, MLv, ML, atau mb yang dikonversi ke Mw) → kelas intensitas MMI + saran, zona sumber, seberapa sering gempa sebesar itu terjadi di zona tersebut, dan profil klaster K-Means. |
+| 📊 **Eksplorasi Data** | Distribusi magnitudo, grafik Gutenberg–Richter, deret waktu bulanan, Mc dan tingkat verifikasi USGS per tahun, penampang kedalaman (Jawa, Sumatra, Laut Maluku, Laut Banda), dan tampilan **3D** (pydeck) yang memperlihatkan lempeng menunjam. |
+| 📘 **Metodologi** | Pipeline, metrik model, perbandingan K-Means vs HDBSCAN, keterbatasan, dan referensi. |
+| 🛡️ **Panduan Keselamatan** | Panduan sebelum, saat, dan sesudah gempa, serta legenda kelas intensitas MMI. |
 
-- **Marker Clustering:** Titik gempa dikelompokkan saat zoom-out agar peta tetap rapi.
-- **Detail Popup:** Mw, magnitudo asli, kedalaman, kelas MMI, profil klaster K-Means, status gempa utama/susulan, dan waktu (UTC).
-- **Balanced Sampling (Water Filling):** Peta menampilkan maksimal 2.000 titik. Kuota dibagi rata per kelas intensitas; sisa kuota dari kelas yang datanya sedikit dialihkan ke kelas lain.
+**Cara menghitung peluang di Cek Lokasi:** laju tahunan tiap zona dibagi rata ke gempa utamanya, sehingga kontribusi zona = laju zona × (gempa zona dalam radius ÷ seluruh gempa zona). Peluang minimal satu kejadian dalam T tahun = 1 − exp(−laju · T).
 
-### 2. 🧹 Katalog Bersih
+---
+
+## 🔬 Pipeline Data & Model
+
+### 🧹 Katalog Bersih
 
 Langkah `python -m gempa.clean` (dokumentasi lengkap di `notebooks/data_cleaning.ipynb`):
 
@@ -41,7 +53,7 @@ Langkah `python -m gempa.clean` (dokumentasi lengkap di `notebooks/data_cleaning
 - **Verifikasi silang dengan USGS ComCat:** gempa Mw ≥ 5 yang tidak punya pasangan di katalog USGS (±60 s, ≤ 150 km), atau yang hanya terekam < 10 fase dengan celah azimut > 180°, ditandai **event semu** (1.530 event). Tingkat kecocokan 95–99% pada tahun normal, tetapi hanya 16–50% pada 2019–2021: katalog BMKG periode itu memuat banyak event fiktif, terutama di Kalimantan/Laut Jawa dan beberapa menit setelah gempa besar di luar wilayah (mis. Selandia Baru, Fiji).
 - **Intensitas per event:** I₀ = 1,5·Mw − 3,5·log₁₀(h) + 3 (Gutenberg–Richter 1956), dipetakan ke kelas MMI I-II / III-IV / V-VI / VII+.
 
-### 3. 🤖 K-Means Clustering
+### 🤖 Profil Klaster K-Means
 
 Mengelompokkan data gempa (k = 4, dipilih dengan silhouette score) berdasarkan karakteristik fisik:
 
@@ -52,7 +64,7 @@ Latitude/longitude sengaja tidak dipakai agar klaster tidak terbentuk karena lok
 
 > ⚠️ Label bersifat relatif antar-klaster, bukan risiko absolut per gempa. Lebih dari seperempat event berlabel *High* berintensitas MMI I–II (tidak terasa), dan gempa besar kedalaman menengah (M7.0 / 150 km) berlabel *Moderate*. Karena itu aplikasi menampilkan label ini sebagai **profil klaster**, sedangkan warna dan rekomendasi memakai kelas MMI per gempa.
 
-### 4. 🧭 Zonasi Seismik
+### 🧭 Zonasi Seismik
 
 Langkah `python -m gempa.zoning` (dokumentasi di `notebooks/seismic_zoning.ipynb`) membagi wilayah menjadi zona sumber gempa, lalu menghitung statistik hazard tiap zona:
 
@@ -63,21 +75,6 @@ Langkah `python -m gempa.zoning` (dokumentasi di `notebooks/seismic_zoning.ipynb
 - **Statistik per zona:** Mc, b-value (maximum likelihood Aki 1965, galat Shi & Bolt 1982), laju tahunan, periode ulang, dan probabilitas Poisson M ≥ 5 / M ≥ 6 dalam 10 dan 50 tahun. Laju hanya dihitung dari tahun yang katalognya sudah lengkap pada Mc zona.
 
 > ⚠️ Probabilitas bersifat statistik katalog 17 tahun (gempa utama, model Poisson), bukan peta bahaya resmi seperti Peta Sumber dan Bahaya Gempa Indonesia (PuSGeN 2017).
-
-### 5. 🔍 Filter & Pencarian Lokasi
-
-- **Rentang Tanggal**, **Kelas Intensitas (MMI)**, dan **Profil Klaster (K-Means)**.
-- **Hanya gempa utama:** sembunyikan gempa susulan hasil declustering.
-- **Sembunyikan event semu** (aktif secara default).
-- **Cari Lokasi:** ketik nama kota/daerah dan atur radius (10–500 km). Ringkasan wilayah berisi gempa terbesar, gempa terbaru, laju gempa utama Mw ≥ 5 per tahun, intensitas tertinggi yang pernah tercatat, dan tabel 10 gempa terbesar.
-
-### 6. ⚡ Estimasi Manual
-
-Masukkan **Mw** dan **kedalaman** gempa untuk mendapatkan estimasi kelas intensitas MMI beserta profil klaster K-Means-nya.
-
-### 7. 🛡️ Panduan Keselamatan
-
-Panduan sebelum, saat, dan sesudah gempa.
 
 ---
 
@@ -112,6 +109,7 @@ Pastikan Anda memiliki [Python](https://www.python.org/) yang terinstall di komp
    ```bash
    streamlit run app/streamlit_app.py
    ```
+   Pencarian nama kota memakai layanan Nominatim (OpenStreetMap), jadi butuh koneksi internet; titik juga bisa dipilih dengan klik peta.
    Aplikasi akan otomatis terbuka di browser Anda (biasanya di `http://localhost:8501`).
 
 ### Melatih Ulang Model
@@ -146,7 +144,10 @@ pytest
 
 ```
 app/
-  streamlit_app.py                 🧠 Kode utama aplikasi (UI & logic)
+  streamlit_app.py                 🧭 Entry point & navigasi halaman
+  common.py                        🧩 Loader data/model (cache), konstanta, CSS, komponen bersama
+  views/                           📄 Halaman: cek_lokasi, zona, peta_gempa, kategorikan, eksplorasi,
+                                      metodologi, keselamatan
 src/gempa/
   data.py                          📥 Load katalog BMKG
   clean.py                         🧹 Pembersihan katalog & laporan kualitas (CLI)
@@ -158,13 +159,15 @@ src/gempa/
   reference.py                     🌍 Unduh & cocokkan katalog pembanding USGS (CLI)
   stats.py                         📈 b-value, laju tahunan, periode ulang, probabilitas Poisson
   zoning.py                        🧭 Zonasi seismik & statistik hazard per zona (CLI)
+  location.py                      📍 Zona di suatu titik & peluang gempa dalam radius
+  timezones.py                     🕒 Perkiraan zona waktu WIB/WITA/WIT dari koordinat
   train.py                         🤖 Pencarian k, training, pelabelan, simpan artifact (CLI)
   paths.py                         📁 Lokasi file data & model
 notebooks/
   data_cleaning.ipynb              🧹 Validasi konversi Mw, Mc, kualitas data, declustering
   earthquake_clustering.ipynb      🔬 Eksplorasi, visualisasi, dan evaluasi K-Means
   seismic_zoning.ipynb             🧭 Zonasi seismik, K-Means vs HDBSCAN, statistik Gutenberg–Richter
-tests/                             🧪 Unit test (pytest)
+tests/                             🧪 Unit test + uji semua halaman aplikasi (AppTest)
 data/
   raw/katalog_gempa_v2.tsv         💾 Katalog gempa BMKG (data mentah)
   raw/usgs_comcat_m4.0_2008_2025.csv  🌍 Katalog pembanding USGS ComCat M ≥ 4 (domain publik)
