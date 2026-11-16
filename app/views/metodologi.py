@@ -41,6 +41,12 @@ ditampilkan sebagai profil; warna dan rekomendasi di aplikasi memakai kelas MMI 
 #### 4. Cek Lokasi (`gempa.location`)
 Laju zona dibagi rata ke gempa utamanya; peluang di sekitar lokasi menjumlahkan kontribusi zona yang gempanya
 berada dalam radius. Zona waktu WIB/WITA/WIT diperkirakan dari koordinat.
+
+#### 5. Gempa Terkini (`gempa.bmkg`)
+Feed publik BMKG (`autogempa`, `gempaterkini`, `gempadirasakan` di data.bmkg.go.id) diambil saat halaman dibuka dan
+disimpan sementara 5 menit (batas BMKG 60 permintaan per menit). Magnitudo BMKG dikonversi ke Mw seperti tipe M di
+katalog, lalu tiap gempa diberi perkiraan intensitas, zona sumber, dan selang waktu rata-rata gempa sebesar itu di
+zonanya. Sumber data: BMKG.
 """)
 
 st.markdown("#### Metrik model")
